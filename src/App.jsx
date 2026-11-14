@@ -1,122 +1,94 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import DiscoverPage from './components/DiscoverPage';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Temporary placeholder so you can test navigation before teammates push their pages
+function TeammatePlaceholder({ title, owner }) {
+  const navigate = useNavigate();
+  const { id } = useParams();
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#0b0c0e',
+        color: '#f5f6f8',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'Inter, sans-serif',
+        gap: '16px',
+        padding: '24px',
+        textAlign: 'center'
+      }}
+    >
+      <span
+        style={{
+          backgroundColor: '#1e2418',
+          color: '#d2ff38',
+          padding: '6px 14px',
+          borderRadius: '999px',
+          fontSize: '12px',
+          fontWeight: 700
+        }}
+      >
+        ROUTE CONNECTED SUCCESSFULLY
+      </span>
+      <h1 style={{ fontSize: '32px' }}>
+        {title} {id ? `(Event ID: #${id})` : ''}
+      </h1>
+      <p style={{ color: '#8b909a', maxWidth: '420px' }}>
+        This route is ready for <strong>{owner}</strong> to drop in their component.
+      </p>
+      <button
+        onClick={() => navigate('/')}
+        style={{
+          marginTop: '12px',
+          backgroundColor: '#d2ff38',
+          color: '#0b0c0e',
+          border: 'none',
+          padding: '12px 24px',
+          borderRadius: '999px',
+          fontWeight: 700,
+          cursor: 'pointer'
+        }}
+      >
+        ← Back to Discover
+      </button>
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Your Main Discover Page */}
+        <Route path="/" element={<DiscoverPage />} />
+
+        {/* Teammate Routes (Replace elements as teammates finish their components) */}
+        <Route
+          path="/explore"
+          element={<TeammatePlaceholder title="Explore & Filter Grid" owner="Member 2 (Explore Lead)" />}
+        />
+        <Route
+          path="/host"
+          element={<TeammatePlaceholder title="Host a Party Portal" owner="Member 3 (Host Lead)" />}
+        />
+        <Route
+          path="/events/:id"
+          element={<TeammatePlaceholder title="Event Details & Checkout" owner="Member 4 (Checkout Lead)" />}
+        />
+        <Route
+          path="/my-tickets"
+          element={<TeammatePlaceholder title="Saved Nights & Digital Tickets" owner="Member 5 (Wallet Lead)" />}
+        />
+        <Route
+          path="/gate-scanner"
+          element={<TeammatePlaceholder title="Host Gate Scanner" owner="Member 5 (Scanner Lead)" />}
+        />
+      </Routes>
+    </Router>
+  );
+}
