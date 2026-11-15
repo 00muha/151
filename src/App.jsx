@@ -1,122 +1,57 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import DiscoverPage from './components/DiscoverPage';
+import HostPage from './components/HostPage';
 
-function App() {
-  const [count, setCount] = useState(0)
+function Custom404() {
+  const location = useLocation();
+  const navigate = useNavigate();
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#0b0c0e] text-[#f5f6f8] flex flex-col items-center justify-center p-6 font-sans select-none">
+      <div className="w-full max-w-md bg-[#131519] border border-white/10 rounded-3xl p-8 text-center shadow-2xl">
+        <span className="inline-block bg-[#1e2418] text-[#d2ff38] text-[11px] font-extrabold tracking-widest px-3.5 py-1.5 rounded-full border border-[#d2ff38]/30 mb-5">
+          ERROR 404 • PAGE NOT LINKED YET
+        </span>
+
+        <h1 className="text-5xl font-black tracking-tight text-white mb-2">
+          404<span className="text-[#d2ff38]">.</span>
+        </h1>
+        <h2 className="text-xl font-bold text-white mb-3">
+          Route ready for teammate.
+        </h2>
+
+        <p className="text-xs text-[#8b909a] leading-relaxed mb-6">
+          The path <span className="text-[#d2ff38] font-mono bg-white/5 px-2 py-0.5 rounded">{location.pathname}</span> BOIZ HAKUNA KITU HAPA
+        </p>
+
         <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+          onClick={() => navigate('/')}
+          className="w-full bg-[#d2ff38] text-[#0b0c0e] font-extrabold text-sm py-3.5 px-6 rounded-full hover:brightness-110 active:scale-95 transition-all cursor-pointer shadow-[0_8px_25px_rgba(210,255,56,0.25)]"
         >
-          Count is {count}
+          ← Back to Discover
         </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Your Main Discover Page */}
+        <Route path="/" element={<DiscoverPage />} />
+
+        {/* Teammate Paths Created & Waiting to be Linked */}
+        <Route path="/saved-nights" element={<Custom404 />} />
+        <Route path="/my-tickets" element={<Custom404 />} />
+        <Route path="/explore" element={<Custom404 />} />
+        <Route path="/host" element={<HostPage />} />
+        <Route path="/events/:id" element={<Custom404 />} />
+        <Route path="/gate-scanner" element={<Custom404 />} />
+        <Route path="*" element={<Custom404 />} />
+      </Routes>
+    </Router>
+  );
+}
