@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import DiscoverPage from './components/DiscoverPage';
+import HostPage from './components/HostPage';
 
 function Custom404() {
   const location = useLocation();
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/events/:id" element={<Custom404 />} />
         <Route path="/gate-scanner" element={<Custom404 />} />
         <Route path="*" element={<Custom404 />} />
+        <Route path="/host" element={<HostPage />} />
       </Routes>
     </Router>
   );
