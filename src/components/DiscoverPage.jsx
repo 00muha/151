@@ -137,7 +137,7 @@ const LOCATIONS = [
 ];
 
 const formatKsh = (amount) =>
-  amount === 0 ? 'Free' : `KSh ${Number(amount).toLocaleString()}`;
+  Number(amount) === 0 ? 'Free' : `KSh ${Number(amount).toLocaleString()}`;
 
 export default function DiscoverPage() {
   const navigate = useNavigate();
@@ -149,7 +149,10 @@ export default function DiscoverPage() {
 
   const [selectedLocation, setSelectedLocation] = useState('All Nairobi Zones');
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+
+  // Search Bar States
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
 
   const [activeVibe, setActiveVibe] = useState('All vibes');
   const [freeOnly, setFreeOnly] = useState(false);
@@ -160,6 +163,7 @@ export default function DiscoverPage() {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const locationDropdownRef = useRef(null);
+  const searchBoxRef = useRef(null);
 
   const [surpriseModalOpen, setSurpriseModalOpen] = useState(false);
   const [isRolling, setIsRolling] = useState(false);
@@ -180,10 +184,14 @@ export default function DiscoverPage() {
       .catch(() => {});
   }, []);
 
+  // Close Location & Search dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (locationDropdownRef.current && !locationDropdownRef.current.contains(e.target)) {
         setLocationMenuOpen(false);
+      }
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target)) {
+        setSearchDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -196,30 +204,63 @@ export default function DiscoverPage() {
     };
   }, []);
 
+  // Multi-field, multi-word live search + filter engine
   const filteredEvents = useMemo(() => {
+    const rawQuery = searchQuery.trim().toLowerCase();
+    const queryWords = rawQuery ? rawQuery.split(/\s+/) : [];
+
     return events.filter((ev) => {
+      const cityStr = (ev.city || '').toLowerCase();
       const matchesLocation =
         selectedLocation === 'All Nairobi Zones' ||
-        ev.city.toLowerCase() === selectedLocation.toLowerCase();
+        !cityStr ||
+        cityStr === selectedLocation.toLowerCase();
 
-      const q = searchQuery.trim().toLowerCase();
+      // Build a single searchable string from all event properties
+      const tagsList = Array.isArray(ev.tags)
+        ? ev.tags
+        : ev.vibe
+        ? [ev.vibe]
+        : [];
+      const priceLabel = Number(ev.price) === 0 ? 'free 0' : `${ev.price} ksh`;
+      const searchableBlob = [
+        ev.title,
+        ev.subtitle,
+        ev.venue,
+        ev.neighborhood,
+        ev.city,
+        ev.pickLabel,
+        ev.time,
+        priceLabel,
+        ...tagsList
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      // Every word typed in the search box must match somewhere in the event
       const matchesSearch =
-        !q ||
-        ev.title.toLowerCase().includes(q) ||
-        ev.venue.toLowerCase().includes(q) ||
-        ev.neighborhood.toLowerCase().includes(q) ||
-        ev.tags.some((t) => t.toLowerCase().includes(q));
+        queryWords.length === 0 ||
+        queryWords.every((word) => searchableBlob.includes(word));
 
       const matchesVibe =
         activeVibe === 'All vibes' ||
-        ev.tags.some((t) => t.toLowerCase() === activeVibe.toLowerCase());
+        tagsList.some((t) => String(t).toLowerCase().includes(activeVibe.toLowerCase()));
 
-      const matchesPrice = !freeOnly || ev.price === 0;
-      const matchesDistance = !within5Km || ev.distanceKm <= 5;
+      const matchesPrice = !freeOnly || Number(ev.price) === 0;
+      const distVal = typeof ev.distanceKm === 'number' ? ev.distanceKm : parseFloat(ev.distance) || 0;
+      const matchesDistance = !within5Km || distVal <= 5;
 
       return matchesLocation && matchesSearch && matchesVibe && matchesPrice && matchesDistance;
     });
   }, [events, selectedLocation, searchQuery, activeVibe, freeOnly, within5Km]);
+
+  // Keep currentIndex valid whenever search results change
+  useEffect(() => {
+    setCurrentIndex(0);
+    setAnimState('');
+    setDragOffset({ x: 0, y: 0 });
+  }, [searchQuery, selectedLocation, activeVibe, freeOnly, within5Km]);
 
   const currentCard = filteredEvents[currentIndex];
   const nextCard = filteredEvents[currentIndex + 1];
@@ -230,8 +271,6 @@ export default function DiscoverPage() {
 
     setAnimState(direction);
     setDragOffset({ x: 0, y: 0 });
-
-    // Note: Teammate working on /saved-nights can hook into direction === 'right' here later
 
     setTimeout(() => {
       setHistory((prev) => [...prev, { index: currentIndex, direction, card: currentCard }]);
@@ -385,8 +424,6 @@ export default function DiscoverPage() {
   const isLikingGreen = dragOffset.x > 25 || animState === 'right';
   const stampOpacity = animState ? 1 : Math.min(Math.abs(dragOffset.x) / 85, 1);
 
-  const nearbyListSource = filteredEvents.length > 0 ? filteredEvents : events;
-
   return (
     <div className="min-h-screen w-full bg-[#0b0c0e] text-[#f5f6f8] flex overflow-x-hidden">
       {/* ================= LEFT SIDEBAR (Desktop lg+) ================= */}
@@ -430,7 +467,7 @@ export default function DiscoverPage() {
         <div className="mt-auto mb-5 bg-gradient-to-br from-[#1b2116] to-[#141812] border border-[#d2ff38]/20 rounded-2xl p-4">
           <h4 className="text-[14px] font-bold mb-1">Make it a night.</h4>
           <p className="text-[11px] text-[#8b909a] leading-snug mb-3">
-            Bring your people together. We&apos;ll bring the good vibes.
+            Bring your people together. We'll bring the good vibes.
           </p>
           <button
             onClick={() => navigate('/host')}
@@ -446,7 +483,7 @@ export default function DiscoverPage() {
             onClick={() => navigate('/help')}
             className="text-[11px] text-[#8b909a] text-left hover:text-white cursor-pointer"
           >
-            Help &amp; feedback
+            Help & feedback
           </button>
           <div className="flex items-center gap-2.5">
             <img
@@ -489,14 +526,13 @@ export default function DiscoverPage() {
               {locationMenuOpen && (
                 <div className="absolute top-full left-0 mt-2 w-56 bg-[#14171d] border border-[#d2ff38]/30 rounded-2xl p-2 shadow-2xl z-50 flex flex-col gap-0.5">
                   <span className="text-[10px] font-bold tracking-wider text-[#8b909a] px-2.5 py-1">
-                    SWITCH TONIGHT&apos;S ZONE
+                    SWITCH TONIGHT'S ZONE
                   </span>
                   {LOCATIONS.map((loc) => (
                     <button
                       key={loc}
                       onClick={() => {
                         setSelectedLocation(loc);
-                        setCurrentIndex(0);
                         setLocationMenuOpen(false);
                       }}
                       className={`flex items-center justify-between px-3 py-2 rounded-xl text-[12px] text-left cursor-pointer transition ${
@@ -561,7 +597,7 @@ export default function DiscoverPage() {
           </button>
         </nav>
 
-        {/* HERO TITLE + SURPRISE ME + FILTER PILLS */}
+        {/* HERO TITLE + SURPRISE ME + WORKING LIVE SEARCH + FILTER PILLS */}
         <section className="my-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3.5">
             <div>
@@ -582,39 +618,100 @@ export default function DiscoverPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center bg-[#14171c] border border-white/[0.08] focus-within:border-[#d2ff38]/60 rounded-full px-3.5 py-1.5 w-full sm:w-60">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentIndex(0);
-                }}
-                placeholder="Search party, venue, vibe..."
-                className="bg-transparent border-none outline-none text-[12px] text-white placeholder-[#8b909a] w-full"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setCurrentIndex(0);
+            {/* LIVE SEARCH INPUT + QUICK-JUMP RESULTS DROPDOWN */}
+            <div ref={searchBoxRef} className="relative w-full sm:w-64">
+              <div className="flex items-center bg-[#14171c] border border-white/[0.1] focus-within:border-[#d2ff38] rounded-full px-3.5 py-1.5 w-full transition">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onFocus={() => setSearchDropdownOpen(true)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setSearchDropdownOpen(true);
                   }}
-                  className="text-[11px] text-[#8b909a] hover:text-white ml-1.5 cursor-pointer"
-                >
-                  ✕
-                </button>
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      setCurrentIndex(0);
+                      setSearchDropdownOpen(false);
+                    }
+                    if (e.key === 'Escape') {
+                      setSearchDropdownOpen(false);
+                    }
+                  }}
+                  placeholder="Search party, venue, vibe, zone..."
+                  className="bg-transparent border-none outline-none text-[12px] text-white placeholder-[#8b909a] w-full"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setCurrentIndex(0);
+                      setSearchDropdownOpen(false);
+                    }}
+                    className="text-[11px] text-[#8b909a] hover:text-white ml-1.5 cursor-pointer"
+                    aria-label="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Instant Search Results Dropdown when typing */}
+              {searchDropdownOpen && searchQuery.trim() !== '' && (
+                <div className="absolute top-full left-0 mt-2 w-full sm:w-80 bg-[#14171d] border border-[#d2ff38]/35 rounded-2xl p-2 shadow-2xl z-50 max-h-64 overflow-y-auto">
+                  <div className="flex items-center justify-between px-2.5 py-1 text-[10px] font-bold tracking-wider text-[#8b909a]">
+                    <span>MATCHING PLOTS ({filteredEvents.length})</span>
+                    <span>PRESS ENTER TO FILTER</span>
+                  </div>
+
+                  {filteredEvents.length === 0 ? (
+                    <div className="px-3 py-3 text-xs text-[#8b909a]">
+                      No parties match “{searchQuery}”. Try another vibe or venue.
+                    </div>
+                  ) : (
+                    filteredEvents.slice(0, 8).map((ev, idx) => (
+                      <button
+                        key={ev.id}
+                        type="button"
+                        onClick={() => {
+                          setCurrentIndex(idx);
+                          setSearchDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl hover:bg-white/[0.06] text-left transition cursor-pointer"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold text-white truncate">{ev.title}</div>
+                          <div className="text-[10px] text-[#8b909a] truncate">
+                            {ev.venue} • {ev.neighborhood} • {ev.tags.join(', ')}
+                          </div>
+                        </div>
+                        <span className="text-[11px] font-bold text-[#d2ff38] shrink-0">
+                          {formatKsh(ev.price)}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
               )}
             </div>
 
-            <button className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold bg-[#1e2418] text-[#d2ff38] border border-[#d2ff38]/40 cursor-pointer">
-              Tonight
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedLocation('All Nairobi Zones');
+                setActiveVibe('All vibes');
+                setFreeOnly(false);
+                setWithin5Km(false);
+              }}
+              className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold bg-[#1e2418] text-[#d2ff38] border border-[#d2ff38]/40 cursor-pointer"
+            >
+              Tonight ({filteredEvents.length})
             </button>
 
             <button
-              onClick={() => {
-                setWithin5Km(!within5Km);
-                setCurrentIndex(0);
-              }}
+              onClick={() => setWithin5Km(!within5Km)}
               className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border transition cursor-pointer ${
                 within5Km
                   ? 'bg-[#1e2418] text-[#d2ff38] border-[#d2ff38]/40'
@@ -629,7 +726,6 @@ export default function DiscoverPage() {
                 const vibes = ['All vibes', 'House', 'Techno', 'Amapiano', 'Disco', 'Afrobeats', 'Rooftop'];
                 const next = vibes[(vibes.indexOf(activeVibe) + 1) % vibes.length];
                 setActiveVibe(next);
-                setCurrentIndex(0);
               }}
               className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border transition cursor-pointer ${
                 activeVibe !== 'All vibes'
@@ -641,10 +737,7 @@ export default function DiscoverPage() {
             </button>
 
             <button
-              onClick={() => {
-                setFreeOnly(!freeOnly);
-                setCurrentIndex(0);
-              }}
+              onClick={() => setFreeOnly(!freeOnly)}
               className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border transition cursor-pointer ${
                 freeOnly
                   ? 'bg-[#1e2418] text-[#d2ff38] border-[#d2ff38]/40'
@@ -668,7 +761,11 @@ export default function DiscoverPage() {
           {/* LEFT COLUMN: SWIPE DECK */}
           <div className="w-full max-w-[540px] mx-auto lg:max-w-none lg:mx-0">
             <div className="flex items-center justify-between text-[10px] tracking-[1.2px] text-[#8b909a] mb-2">
-              <span>CURATED FOR YOUR ENERGY</span>
+              <span>
+                {searchQuery.trim()
+                  ? `SEARCH RESULTS FOR "${searchQuery.toUpperCase()}"`
+                  : 'CURATED FOR YOUR ENERGY'}
+              </span>
               <span>
                 {filteredEvents.length > 0 && currentCard
                   ? `${String(currentIndex + 1).padStart(2, '0')} / ${String(filteredEvents.length).padStart(2, '0')}`
@@ -725,7 +822,7 @@ export default function DiscoverPage() {
                       style={{ opacity: stampOpacity }}
                       className="absolute top-16 left-6 z-20 border-3 border-emerald-400 text-emerald-400 bg-black/80 px-4 py-1.5 rounded-xl text-2xl font-black tracking-widest -rotate-12 shadow-[0_0_25px_rgba(34,197,94,0.6)] pointer-events-none"
                     >
-                      I&apos;M IN ♡
+                      I'M IN ♡
                     </div>
                   )}
 
@@ -795,9 +892,9 @@ export default function DiscoverPage() {
                 </div>
               ) : (
                 <div className="h-full rounded-[22px] bg-[#131519] border border-dashed border-white/15 flex flex-col items-center justify-center text-center p-6 gap-2.5">
-                  <h3 className="text-base font-bold">No plots match that filter tonight.</h3>
+                  <h3 className="text-base font-bold">No plots match that search tonight.</h3>
                   <p className="text-xs text-[#8b909a]">
-                    Reset your search or switch zones to keep swiping all 60 places.
+                    Reset your search or filters to browse all 60 live places.
                   </p>
                   <button
                     onClick={() => {
@@ -810,7 +907,7 @@ export default function DiscoverPage() {
                     }}
                     className="mt-1 bg-[#d2ff38] text-[#0b0c0e] font-bold text-xs px-4 py-2 rounded-full cursor-pointer"
                   >
-                    Reset Deck
+                    Reset Search & Filters
                   </button>
                 </div>
               )}
@@ -852,14 +949,14 @@ export default function DiscoverPage() {
                     ♡
                   </button>
                   <span className="text-[10px] font-extrabold tracking-widest text-emerald-400">
-                    I&apos;M IN
+                    I'M IN
                   </span>
                 </div>
               </div>
 
               <p className="text-[10px] text-[#8b909a] mt-2">
                 <span className="text-red-400">← Pass</span> •{' '}
-                <span className="text-emerald-400">I&apos;m In →</span>
+                <span className="text-emerald-400">I'm In →</span>
               </p>
             </div>
           </div>
@@ -870,7 +967,9 @@ export default function DiscoverPage() {
               <div>
                 <h3 className="text-[17px] font-bold leading-snug">Good nights nearby</h3>
                 <p className="text-[12px] text-[#8b909a]">
-                  A few more reasons to leave the couch. ({nearbyListSource.length} tonight)
+                  {searchQuery.trim()
+                    ? `${filteredEvents.length} matching tonight’s search`
+                    : `A few more reasons to leave the couch. (${filteredEvents.length} tonight)`}
                 </p>
               </div>
               <button
@@ -881,69 +980,70 @@ export default function DiscoverPage() {
               </button>
             </div>
 
-            <div className="max-h-[255px] overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/15 [&::-webkit-scrollbar-thumb]:rounded-full">
-              {nearbyListSource.slice(0, nearbyVisibleCount).map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => {
-                    const deckIdx = filteredEvents.findIndex((e) => e.id === item.id);
-                    if (deckIdx !== -1) {
-                      setCurrentIndex(deckIdx);
-                    } else {
-                      navigate(`/events/${item.id}`);
-                    }
-                  }}
-                  className={`flex items-center gap-3 bg-[#131519] border p-2.5 rounded-2xl cursor-pointer transition hover:-translate-y-0.5 ${
-                    currentCard?.id === item.id
-                      ? 'border-[#d2ff38]/50 bg-[#171b13]'
-                      : 'border-white/[0.08] hover:border-[#d2ff38]/30'
-                  }`}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = FALLBACK_IMAGE;
-                    }}
-                    className="w-16 h-16 rounded-xl object-cover shrink-0 bg-[#1a1d24]"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <span className="block text-[9px] font-bold tracking-wider text-[#d2ff38] truncate">
-                      {item.tags[0].toUpperCase()} • {item.neighborhood}
-                    </span>
-                    <h4 className="text-[14px] font-bold text-white truncate leading-snug">
-                      {item.title}
-                    </h4>
-                    <span className="block text-[11px] text-[#8b909a] truncate">
-                      {item.time.split('–')[0]} • {item.distance}
-                    </span>
-                    <span className="block text-[11px] font-bold text-[#d2ff38]">
-                      {formatKsh(item.price)}
-                    </span>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/events/${item.id}`);
-                    }}
-                    className="text-base text-[#8b909a] hover:text-[#d2ff38] px-1.5"
-                    title="Open event details"
+            {filteredEvents.length === 0 ? (
+              <div className="bg-[#131519] border border-white/[0.08] rounded-2xl p-5 text-center my-2">
+                <p className="text-xs text-[#8b909a]">
+                  No nearby parties match “{searchQuery}”.
+                </p>
+              </div>
+            ) : (
+              <div className="max-h-[255px] overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/15 [&::-webkit-scrollbar-thumb]:rounded-full">
+                {filteredEvents.slice(0, nearbyVisibleCount).map((item, idx) => (
+                  <div
+                    key={item.id}
+                    onClick={() => setCurrentIndex(idx)}
+                    className={`flex items-center gap-3 bg-[#131519] border p-2.5 rounded-2xl cursor-pointer transition hover:-translate-y-0.5 ${
+                      currentCard?.id === item.id
+                        ? 'border-[#d2ff38]/50 bg-[#171b13]'
+                        : 'border-white/[0.08] hover:border-[#d2ff38]/30'
+                    }`}
                   >
-                    ›
-                  </button>
-                </div>
-              ))}
-            </div>
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = FALLBACK_IMAGE;
+                      }}
+                      className="w-16 h-16 rounded-xl object-cover shrink-0 bg-[#1a1d24]"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <span className="block text-[9px] font-bold tracking-wider text-[#d2ff38] truncate">
+                        {item.tags[0].toUpperCase()} • {item.neighborhood}
+                      </span>
+                      <h4 className="text-[14px] font-bold text-white truncate leading-snug">
+                        {item.title}
+                      </h4>
+                      <span className="block text-[11px] text-[#8b909a] truncate">
+                        {item.time.split('–')[0]} • {item.distance}
+                      </span>
+                      <span className="block text-[11px] font-bold text-[#d2ff38]">
+                        {formatKsh(item.price)}
+                      </span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/events/${item.id}`);
+                      }}
+                      className="text-base text-[#8b909a] hover:text-[#d2ff38] px-1.5"
+                      title="Open event details"
+                    >
+                      ›
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            {nearbyVisibleCount < nearbyListSource.length && (
+            {nearbyVisibleCount < filteredEvents.length && (
               <button
                 onClick={() =>
-                  setNearbyVisibleCount((prev) => Math.min(prev + 12, nearbyListSource.length))
+                  setNearbyVisibleCount((prev) => Math.min(prev + 12, filteredEvents.length))
                 }
                 className="w-full mt-2 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-[11px] font-semibold text-[#d2ff38] cursor-pointer transition"
               >
-                Show more places ({nearbyListSource.length - nearbyVisibleCount} more)
+                Show more places ({filteredEvents.length - nearbyVisibleCount} more)
               </button>
             )}
 
@@ -974,7 +1074,7 @@ export default function DiscoverPage() {
                 <div>
                   <h4 className="text-[15px] font-bold mb-1">Make it a night.</h4>
                   <p className="text-[11px] text-[#8b909a] leading-relaxed mb-3">
-                    Bring your people together. We&apos;ll bring the good vibes.
+                    Bring your people together. We'll bring the good vibes.
                   </p>
                 </div>
                 <button
@@ -1018,7 +1118,7 @@ export default function DiscoverPage() {
             </button>
 
             <span className="inline-block bg-white/10 text-purple-300 text-[9px] font-bold px-2.5 py-0.5 rounded-full mb-1.5">
-              TONIGHT&apos;S FATE PICKER
+              TONIGHT'S FATE PICKER
             </span>
             <h2 className="text-xl font-extrabold">
               {isRolling ? 'Scanning 60 live plots...' : 'We found your spot.'}
@@ -1111,7 +1211,7 @@ export default function DiscoverPage() {
                 disabled={isRolling}
                 className="sm:flex-1 py-2.5 rounded-full bg-emerald-400 text-[#0b0c0e] text-xs font-extrabold cursor-pointer shadow-[0_6px_20px_rgba(34,197,94,0.35)] hover:brightness-110 transition"
               >
-                I&apos;m In — View Event
+                I'm In — View Event
               </button>
             </div>
           </div>
