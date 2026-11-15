@@ -62,7 +62,7 @@
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
   background: transparent;
   border: none;
   color: var(--text-muted);
@@ -86,7 +86,6 @@
 }
 
 .nav-badge {
-  margin-left: auto;
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-main);
   padding: 2px 8px;
@@ -206,6 +205,7 @@
   border: none;
   color: var(--text-main);
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -219,19 +219,21 @@
 
 .notif-btn {
   position: relative;
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-border);
+  padding: 6px 12px;
+  border-radius: 999px;
   color: var(--text-main);
-  font-size: 16px;
+  font-size: 12px;
   cursor: pointer;
 }
 
 .notif-dot {
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 7px;
-  height: 7px;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
   background: var(--neon-lime);
   border-radius: 50%;
 }
@@ -272,7 +274,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -364,7 +365,6 @@
   transition: transform 0.34s ease, opacity 0.34s ease;
 }
 
-/* Card Keyframe Animations */
 .swipe-left {
   transform: translate3d(-135%, 25px, 0) rotate(-18deg) !important;
   opacity: 0;
@@ -379,10 +379,6 @@
   animation: rewindCard 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.surprise-pulse {
-  animation: shufflePulse 0.42s ease-in-out;
-}
-
 @keyframes rewindCard {
   0% {
     transform: translate3d(-80%, -15px, 0) rotate(-12deg) scale(0.9);
@@ -392,13 +388,6 @@
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
     opacity: 1;
   }
-}
-
-@keyframes shufflePulse {
-  0% { transform: scale(1) rotate(0deg); }
-  40% { transform: scale(0.92) rotate(-4deg); filter: brightness(1.4); }
-  75% { transform: scale(0.95) rotate(4deg); }
-  100% { transform: scale(1) rotate(0deg); }
 }
 
 /* Drag Overlay Stamps */
@@ -728,12 +717,6 @@
   line-height: 1.45;
 }
 
-.sparkle-icon {
-  font-size: 28px;
-  color: #a48bff;
-  margin-left: 14px;
-}
-
 .story-footnote {
   font-size: 12px;
   color: var(--text-muted);
@@ -751,7 +734,331 @@
 }
 
 /* =================================================================
-   TABLET BREAKPOINT (<= 1024px — Matches Figma 834px Frame)
+   LOCATION DROPDOWN & LIVE SEARCH BAR
+   ================================================================= */
+.location-dropdown-wrap {
+  position: relative;
+}
+
+.loc-caret {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.loc-caret.open {
+  transform: rotate(180deg);
+  color: var(--neon-lime);
+}
+
+.location-menu-pop {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 230px;
+  background: #14171d;
+  border: 1px solid rgba(210, 255, 56, 0.28);
+  border-radius: 16px;
+  padding: 10px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: fadeOverlay 0.18s ease-out;
+}
+
+.loc-menu-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  padding: 6px 10px 4px;
+}
+
+.loc-option {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s ease;
+}
+
+.loc-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.loc-option.active {
+  background: var(--olive-surface);
+  color: var(--neon-lime);
+  font-weight: 600;
+}
+
+.loc-check {
+  color: var(--neon-lime);
+  font-size: 10px;
+}
+
+.search-and-pills-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-search-box {
+  display: flex;
+  align-items: center;
+  background: #14171c;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  min-width: 250px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.live-search-box:focus-within {
+  border-color: rgba(210, 255, 56, 0.55);
+  box-shadow: 0 0 0 3px rgba(210, 255, 56, 0.12);
+}
+
+.live-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main);
+  font-size: 13px;
+  width: 100%;
+}
+
+.live-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.clear-search-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.empty-deck-box {
+  height: 100%;
+  border-radius: 24px;
+  background: var(--panel-dark);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px;
+  gap: 12px;
+}
+
+.empty-deck-box p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* =================================================================
+   SURPRISE ME POPUP MODAL & SLOT ANIMATION
+   ================================================================= */
+.surprise-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 6, 8, 0.82);
+  backdrop-filter: blur(12px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  animation: fadeOverlay 0.22s ease-out;
+}
+
+.surprise-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: #12141a;
+  border: 1px solid rgba(210, 255, 56, 0.28);
+  border-radius: 26px;
+  padding: 26px;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.85), 0 0 40px rgba(210, 255, 56, 0.08);
+  animation: modalPopUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.surprise-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.surprise-close-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--text-main);
+}
+
+.surprise-modal-header h2 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.surprise-modal-header p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.surprise-criteria-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.crit-pill {
+  flex: 1;
+  min-width: 110px;
+  background: #181b22;
+  border: 1px solid var(--card-border);
+  color: var(--text-muted);
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.crit-pill.active {
+  background: var(--olive-surface);
+  color: var(--neon-lime);
+  border-color: rgba(210, 255, 56, 0.45);
+}
+
+.surprise-result-box {
+  height: 290px;
+  border-radius: 20px;
+  background-size: cover;
+  background-position: center;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  margin-bottom: 20px;
+  transition: transform 0.25s ease, filter 0.2s ease;
+}
+
+.rolling-blur {
+  filter: blur(3px) brightness(1.2);
+  transform: scale(0.97);
+}
+
+.locked-pop {
+  animation: resultLockIn 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.surprise-result-info h3 {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.surprise-result-info p {
+  font-size: 13px;
+  color: #d0d4dc;
+  margin-bottom: 10px;
+}
+
+.surprise-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #bfc4ce;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.surprise-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.reroll-btn {
+  flex: 0.45;
+  padding: 14px;
+  border-radius: 999px;
+  background: #1a1d24;
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.reroll-btn:hover {
+  background: #232730;
+}
+
+.accept-surprise-btn {
+  flex: 0.55;
+  padding: 14px;
+  border-radius: 999px;
+  background: var(--neon-lime);
+  border: none;
+  color: #0b0c0e;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(210, 255, 56, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.accept-surprise-btn:hover {
+  transform: translateY(-2px);
+}
+
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalPopUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes resultLockIn {
+  0% { transform: scale(0.94); }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* =================================================================
+   TABLET BREAKPOINT (834px Frame)
    ================================================================= */
 @media (max-width: 1024px) {
   .aftr-sidebar,
@@ -786,9 +1093,10 @@
     border-radius: 12px;
     font-size: 13px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 4px;
     cursor: pointer;
   }
 
@@ -798,8 +1106,9 @@
   }
 
   .icon-badge-wrap {
-    position: relative;
     display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .mini-count {
@@ -807,7 +1116,12 @@
     font-size: 10px;
     padding: 1px 6px;
     border-radius: 99px;
-    margin-left: 4px;
+  }
+
+  .tab-sub-total {
+    font-size: 11px;
+    color: var(--neon-lime);
+    font-weight: 600;
   }
 
   .discover-grid {
@@ -827,7 +1141,6 @@
     gap: 12px;
   }
 
-  /* 2-Column Nearby Cards & Promo Cards on Tablet */
   .nearby-cards-list,
   .promo-bento-grid {
     display: grid;
@@ -845,17 +1158,14 @@
 }
 
 /* =================================================================
-   MOBILE PHONE BREAKPOINT (<= 600px — Matches Figma 390px Frame)
+   MOBILE PHONE BREAKPOINT (390px Frame)
    ================================================================= */
 @media (max-width: 600px) {
   .aftr-main {
     padding: 14px 16px;
   }
 
-  /* Stacked Icon + Label Top Navigation */
   .compact-tab {
-    flex-direction: column;
-    gap: 4px;
     padding: 8px 4px;
     font-size: 11px;
   }
@@ -866,7 +1176,8 @@
     gap: 14px;
   }
 
-  .surprise-btn {
+  .surprise-btn,
+  .live-search-box {
     width: 100%;
   }
 
@@ -889,6 +1200,14 @@
   .nearby-cards-list,
   .promo-bento-grid {
     grid-template-columns: 1fr;
+  }
+
+  .surprise-modal-card {
+    padding: 20px 16px;
+  }
+
+  .surprise-modal-actions {
+    flex-direction: column;
   }
 
   .aftr-footer {

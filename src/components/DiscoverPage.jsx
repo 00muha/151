@@ -5,6 +5,7 @@ import './Discover.css';
 const INITIAL_EVENTS = [
   {
     id: '1',
+    city: 'Brooklyn, New York',
     pickLabel: "TONIGHT'S PICK",
     title: 'Above the city.',
     subtitle: 'A rooftop, a sunset, and your new favorite DJ.',
@@ -20,9 +21,10 @@ const INITIAL_EVENTS = [
   },
   {
     id: '2',
+    city: 'Brooklyn, New York',
     pickLabel: 'UNDERGROUND PICK',
     title: 'Basement frequencies',
-    subtitle: ' Raw industrial warehouse sound system all night.',
+    subtitle: 'Raw industrial warehouse sound system all night.',
     venue: 'Bushwick Vault',
     distance: '2.4 mi',
     distanceMiles: 2.4,
@@ -35,6 +37,7 @@ const INITIAL_EVENTS = [
   },
   {
     id: '3',
+    city: 'Brooklyn, New York',
     pickLabel: 'CROWD FAVORITE',
     title: 'Disco, not dead.',
     subtitle: 'Vinyl-only grooves, mirrorballs, and zero pretension.',
@@ -50,9 +53,10 @@ const INITIAL_EVENTS = [
   },
   {
     id: '4',
+    city: 'Manhattan, New York',
     pickLabel: 'SECRET PIN',
     title: 'Velvet Afterhours',
-    subtitle: 'Late-night amapiano & afro-house session.',
+    subtitle: 'Late-night amapiano and afro-house session.',
     venue: 'SoHo Secret Loft',
     distance: '3.1 mi',
     distanceMiles: 3.1,
@@ -62,16 +66,55 @@ const INITIAL_EVENTS = [
     neighborhood: 'SOHO',
     spotsLeft: 3,
     image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1000&auto=format&fit=crop&q=80'
+  },
+  {
+    id: '5',
+    city: 'Nairobi, Kenya',
+    pickLabel: 'TONIGHT IN NAIROBI',
+    title: 'Skyline Amapiano Sundowner',
+    subtitle: 'Golden hour sets, rooftop views, and deep basslines.',
+    venue: 'Kilimani Penthouse Deck',
+    distance: '1.5 mi',
+    distanceMiles: 1.5,
+    time: 'Tonight, 7 PM – late',
+    price: 10,
+    tags: ['Afrobeats', 'Rooftop'],
+    neighborhood: 'KILIMANI',
+    spotsLeft: 6,
+    image: 'https://images.unsplash.com/photo-1545128485-c400e7702796?w=1000&auto=format&fit=crop&q=80'
+  },
+  {
+    id: '6',
+    city: 'Nairobi, Kenya',
+    pickLabel: 'UNDERGROUND LAB',
+    title: 'Westlands Bass Bunker',
+    subtitle: 'Club edits, house grooves, and late-night warehouse energy.',
+    venue: 'The Alchemist Basement',
+    distance: '2.8 mi',
+    distanceMiles: 2.8,
+    time: '10 PM – 4 AM',
+    price: 0,
+    tags: ['House', 'Techno'],
+    neighborhood: 'WESTLANDS',
+    spotsLeft: 11,
+    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1000&auto=format&fit=crop&q=80'
   }
+];
+
+const LOCATIONS = [
+  'All Locations',
+  'Brooklyn, New York',
+  'Manhattan, New York',
+  'Nairobi, Kenya'
 ];
 
 export default function DiscoverPage() {
   const navigate = useNavigate();
 
-  // State for events, filters, and saved lineup
+  // Core Data & Swipe Deck State
   const [events, setEvents] = useState(INITIAL_EVENTS);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [history, setHistory] = useState([]); // Tracks swiped cards for Undo button
+  const [history, setHistory] = useState([]);
   const [savedParties, setSavedParties] = useState([
     { id: '99', price: 20 },
     { id: '98', price: 15 },
@@ -79,41 +122,73 @@ export default function DiscoverPage() {
     { id: '96', price: 25 }
   ]);
 
-  // Filter states
+  // Location Dropdown & Live Search States
+  const [selectedLocation, setSelectedLocation] = useState('Brooklyn, New York');
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter Pill States
   const [activeVibe, setActiveVibe] = useState('All vibes');
   const [freeOnly, setFreeOnly] = useState(false);
   const [within5Mi, setWithin5Mi] = useState(true);
 
-  // Animation & Drag Physics states
-  const [animClass, setAnimClass] = useState(''); // 'swipe-left', 'swipe-right', 'rewind-in', 'surprise-pulse'
+  // Drag & Animation States
+  const [animClass, setAnimClass] = useState('');
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
+  const locationDropdownRef = useRef(null);
 
-  // Surprise Me Modal states
+  // Surprise Me Modal States
   const [surpriseModalOpen, setSurpriseModalOpen] = useState(false);
   const [isRolling, setIsRolling] = useState(false);
   const [surpriseEvent, setSurpriseEvent] = useState(null);
-  const [surpriseCriteria, setSurpriseCriteria] = useState('best'); // 'best', 'budget', 'closest'
-  // Fetch from json-server if running, otherwise fallback to INITIAL_EVENTS
+  const [surpriseCriteria, setSurpriseCriteria] = useState('best');
+
+  // Optional fetch from json-server if running
   useEffect(() => {
     fetch('http://localhost:3000/events')
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) setEvents(data);
       })
-      .catch(() => {
-        // Keeps INITIAL_EVENTS if json-server isn't started yet
-      });
+      .catch(() => {});
   }, []);
 
-  // Filtered deck
+  // Close Location Dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (locationDropdownRef.current && !locationDropdownRef.current.contains(e.target)) {
+        setLocationMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Combined Filtering
   const filteredEvents = events.filter((ev) => {
+    const matchesLocation =
+      selectedLocation === 'All Locations' ||
+      !ev.city ||
+      ev.city.toLowerCase() === selectedLocation.toLowerCase();
+
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      ev.title.toLowerCase().includes(q) ||
+      ev.venue.toLowerCase().includes(q) ||
+      ev.neighborhood.toLowerCase().includes(q) ||
+      ev.tags.some((t) => t.toLowerCase().includes(q));
+
     const matchesVibe =
-      activeVibe === 'All vibes' || ev.tags.some((t) => t.toLowerCase() === activeVibe.toLowerCase());
+      activeVibe === 'All vibes' ||
+      ev.tags.some((t) => t.toLowerCase() === activeVibe.toLowerCase());
+
     const matchesPrice = !freeOnly || ev.price === 0;
     const matchesDistance = !within5Mi || ev.distanceMiles <= 5;
-    return matchesVibe && matchesPrice && matchesDistance;
+
+    return matchesLocation && matchesSearch && matchesVibe && matchesPrice && matchesDistance;
   });
 
   const currentCard = filteredEvents[currentIndex];
@@ -142,7 +217,7 @@ export default function DiscoverPage() {
     }, 340);
   };
 
-  // --- UNDO / REWIND ACTION ---
+  // --- UNDO LAST SWIPE ---
   const handleUndo = () => {
     if (history.length === 0 || animClass) return;
     const lastAction = history[history.length - 1];
@@ -156,59 +231,62 @@ export default function DiscoverPage() {
     setAnimClass('rewind-in');
     setTimeout(() => setAnimClass(''), 350);
   };
-const pickSuitableEvent = (criteria = surpriseCriteria) => {
-  const pool = filteredEvents.length > 0 ? filteredEvents : events;
-  if (pool.length === 0) return;
 
-  setIsRolling(true);
-  setSurpriseCriteria(criteria);
+  // --- SURPRISE ME POPUP & SMART MATCHER ---
+  const pickSuitableEvent = (criteria = surpriseCriteria) => {
+    const pool = filteredEvents.length > 0 ? filteredEvents : events;
+    if (pool.length === 0) return;
 
-  let candidates = [...pool];
-  if (criteria === 'budget') {
-    candidates = pool.filter((e) => e.price <= 15);
-  } else if (criteria === 'closest') {
-    candidates = [...pool].sort((a, b) => a.distanceMiles - b.distanceMiles).slice(0, 2);
-  }
-  if (candidates.length === 0) candidates = pool;
+    setIsRolling(true);
+    setSurpriseCriteria(criteria);
 
-  let ticks = 0;
-  const interval = setInterval(() => {
-    const randomPreview = pool[Math.floor(Math.random() * pool.length)];
-    setSurpriseEvent(randomPreview);
-    ticks += 1;
-
-    if (ticks >= 6) {
-      clearInterval(interval);
-      const others = candidates.filter((c) => c.id !== surpriseEvent?.id);
-      const finalPick =
-        others.length > 0
-          ? others[Math.floor(Math.random() * others.length)]
-          : candidates[Math.floor(Math.random() * candidates.length)];
-
-      setSurpriseEvent(finalPick);
-      setIsRolling(false);
+    let candidates = [...pool];
+    if (criteria === 'budget') {
+      candidates = pool.filter((e) => e.price <= 15);
+    } else if (criteria === 'closest') {
+      candidates = [...pool].sort((a, b) => a.distanceMiles - b.distanceMiles).slice(0, 2);
     }
-  }, 90);
-};
-  // --- SURPRISE ME SHUFFLE ANIMATION ---
+    if (candidates.length === 0) candidates = pool;
+
+    let ticks = 0;
+    const interval = setInterval(() => {
+      const randomPreview = pool[Math.floor(Math.random() * pool.length)];
+      setSurpriseEvent(randomPreview);
+      ticks += 1;
+
+      if (ticks >= 6) {
+        clearInterval(interval);
+        const others = candidates.filter((c) => c.id !== surpriseEvent?.id);
+        const finalPick =
+          others.length > 0
+            ? others[Math.floor(Math.random() * others.length)]
+            : candidates[Math.floor(Math.random() * candidates.length)];
+
+        setSurpriseEvent(finalPick);
+        setIsRolling(false);
+      }
+    }, 90);
+  };
+
   const handleSurpriseMe = () => {
-  setSurpriseModalOpen(true);
-  pickSuitableEvent(surpriseCriteria);
-};
+    setSurpriseModalOpen(true);
+    pickSuitableEvent(surpriseCriteria);
+  };
 
-const handleAcceptSurprise = () => {
-  if (!surpriseEvent) return;
-  setSavedParties((prev) => {
-    if (prev.some((p) => p.id === surpriseEvent.id)) return prev;
-    return [...prev, surpriseEvent];
-  });
-  setSurpriseModalOpen(false);
-  navigate(`/events/${surpriseEvent.id}`);
-};
+  const handleAcceptSurprise = () => {
+    if (!surpriseEvent) return;
+    setSavedParties((prev) => {
+      if (prev.some((p) => p.id === surpriseEvent.id)) return prev;
+      return [...prev, surpriseEvent];
+    });
+    setSurpriseModalOpen(false);
+    navigate(`/events/${surpriseEvent.id}`);
+  };
 
-  // --- KEYBOARD ARROWS SUPPORT (<- Pass • Save ->) ---
+  // --- KEYBOARD ARROWS SUPPORT ---
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (surpriseModalOpen || document.activeElement?.tagName === 'INPUT') return;
       if (e.key === 'ArrowLeft') triggerSwipe('left');
       if (e.key === 'ArrowRight') triggerSwipe('right');
       if (e.key === 'Backspace') handleUndo();
@@ -240,11 +318,10 @@ const handleAcceptSurprise = () => {
     } else if (dragOffset.x < -110) {
       triggerSwipe('left');
     } else {
-      setDragOffset({ x: 0, y: 0 }); // Snap smoothly back to center
+      setDragOffset({ x: 0, y: 0 });
     }
   };
 
-  // Dynamic inline transform while dragging
   const dragStyle = isDragging
     ? {
         transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0) rotate(${dragOffset.x * 0.06}deg)`,
@@ -267,22 +344,18 @@ const handleAcceptSurprise = () => {
 
         <nav className="sidebar-nav">
           <button className="nav-item active">
-            <span className="nav-icon">🧭</span>
             <span>Discover</span>
           </button>
           <button className="nav-item" onClick={() => navigate('/my-tickets')}>
-            <span className="nav-icon">♡</span>
             <span>Saved nights</span>
             <span className="nav-badge">
               {savedParties.length} • ${totalSavedDamage}
             </span>
           </button>
           <button className="nav-item" onClick={() => navigate('/my-tickets')}>
-            <span className="nav-icon">🎟️</span>
             <span>My tickets</span>
           </button>
           <button className="nav-item" onClick={() => navigate('/explore')}>
-            <span className="nav-icon">🗺️</span>
             <span>Explore map</span>
           </button>
         </nav>
@@ -297,7 +370,7 @@ const handleAcceptSurprise = () => {
         </div>
 
         <div className="sidebar-footer">
-          <button className="help-btn">? Help & feedback</button>
+          <button className="help-btn">Help & feedback</button>
           <div className="user-mini-profile">
             <img
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120"
@@ -316,19 +389,46 @@ const handleAcceptSurprise = () => {
       <div className="aftr-main">
         {/* TOP HEADER BAR */}
         <header className="aftr-topbar">
-          <div className="topbar-left">
+          <div className="topbar-left" ref={locationDropdownRef}>
             <span className="mobile-brand">
               aftr<span className="neon-dot">.</span>
             </span>
-            <button className="location-pill">
-              <span className="loc-pin">📍</span> Brooklyn, New York <span>▾</span>
-            </button>
+
+            <div className="location-dropdown-wrap">
+              <button
+                className="location-pill"
+                onClick={() => setLocationMenuOpen((prev) => !prev)}
+              >
+                <span>{selectedLocation}</span>
+                <span className={`loc-caret ${locationMenuOpen ? 'open' : ''}`}>▾</span>
+              </button>
+
+              {locationMenuOpen && (
+                <div className="location-menu-pop">
+                  <span className="loc-menu-title">SWITCH TONIGHT'S ZONE</span>
+                  {LOCATIONS.map((loc) => (
+                    <button
+                      key={loc}
+                      className={`loc-option ${selectedLocation === loc ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedLocation(loc);
+                        setCurrentIndex(0);
+                        setLocationMenuOpen(false);
+                      }}
+                    >
+                      <span>{loc}</span>
+                      {selectedLocation === loc && <span className="loc-check">●</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="topbar-right">
             <span className="spontaneous-text">A little spontaneous looks good on you.</span>
             <button className="notif-btn" aria-label="Notifications">
-              🔔<span className="notif-dot"></span>
+              Alerts<span className="notif-dot"></span>
             </button>
             <img
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120"
@@ -341,27 +441,24 @@ const handleAcceptSurprise = () => {
         {/* TABLET & MOBILE HORIZONTAL NAV BAR */}
         <nav className="compact-nav">
           <button className="compact-tab active">
-            <span className="tab-icon">🧭</span>
             <span className="tab-label">Discover</span>
           </button>
           <button className="compact-tab" onClick={() => navigate('/my-tickets')}>
             <div className="icon-badge-wrap">
-              <span className="tab-icon">♡</span>
+              <span className="tab-label">Saved nights</span>
               <span className="mini-count">{savedParties.length}</span>
             </div>
-            <span className="tab-label">Saved (${totalSavedDamage})</span>
+            <span className="tab-sub-total">${totalSavedDamage} Total</span>
           </button>
           <button className="compact-tab" onClick={() => navigate('/my-tickets')}>
-            <span className="tab-icon">🎟️</span>
             <span className="tab-label">My tickets</span>
           </button>
           <button className="compact-tab" onClick={() => navigate('/explore')}>
-            <span className="tab-icon">🗺️</span>
             <span className="tab-label">Explore map</span>
           </button>
         </nav>
 
-        {/* HERO TITLE + SURPRISE ME + FILTER PILLS */}
+        {/* HERO TITLE + SURPRISE ME + LIVE SEARCH BAR + FILTER PILLS */}
         <section className="hero-filter-section">
           <div className="hero-title-row">
             <div>
@@ -369,62 +466,88 @@ const handleAcceptSurprise = () => {
               <p>Less scrolling. More stories worth telling.</p>
             </div>
             <button className="surprise-btn" onClick={handleSurpriseMe}>
-              <span>🎲</span> Surprise me
+              Surprise me
             </button>
           </div>
 
-          <div className="filter-pills-row">
-            <button className="f-pill active-tonight">Tonight</button>
-            <button
-              className={`f-pill ${within5Mi ? 'active-pill' : ''}`}
-              onClick={() => {
-                setWithin5Mi(!within5Mi);
-                setCurrentIndex(0);
-              }}
-            >
-              Within 5 mi
-            </button>
-            <button
-              className={`f-pill ${activeVibe !== 'All vibes' ? 'active-pill' : ''}`}
-              onClick={() => {
-                const vibes = ['All vibes', 'House', 'Techno', 'Disco', 'Rooftop'];
-                const next = vibes[(vibes.indexOf(activeVibe) + 1) % vibes.length];
-                setActiveVibe(next);
-                setCurrentIndex(0);
-              }}
-            >
-              {activeVibe}
-            </button>
-            <button
-              className={`f-pill ${freeOnly ? 'active-pill' : ''}`}
-              onClick={() => {
-                setFreeOnly(!freeOnly);
-                setCurrentIndex(0);
-              }}
-            >
-              {freeOnly ? 'Free only' : 'Any price'}
-            </button>
-            <button className="f-pill" onClick={() => navigate('/explore')}>
-              ⇄ Filters
-            </button>
+          <div className="search-and-pills-bar">
+            <div className="live-search-box">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentIndex(0);
+                }}
+                placeholder="Search party, venue, or vibe..."
+                className="live-search-input"
+              />
+              {searchQuery && (
+                <button
+                  className="clear-search-btn"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setCurrentIndex(0);
+                  }}
+                  aria-label="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <div className="filter-pills-row">
+              <button className="f-pill active-tonight">Tonight</button>
+              <button
+                className={`f-pill ${within5Mi ? 'active-pill' : ''}`}
+                onClick={() => {
+                  setWithin5Mi(!within5Mi);
+                  setCurrentIndex(0);
+                }}
+              >
+                Within 5 mi
+              </button>
+              <button
+                className={`f-pill ${activeVibe !== 'All vibes' ? 'active-pill' : ''}`}
+                onClick={() => {
+                  const vibes = ['All vibes', 'House', 'Techno', 'Disco', 'Afrobeats', 'Rooftop'];
+                  const next = vibes[(vibes.indexOf(activeVibe) + 1) % vibes.length];
+                  setActiveVibe(next);
+                  setCurrentIndex(0);
+                }}
+              >
+                {activeVibe}
+              </button>
+              <button
+                className={`f-pill ${freeOnly ? 'active-pill' : ''}`}
+                onClick={() => {
+                  setFreeOnly(!freeOnly);
+                  setCurrentIndex(0);
+                }}
+              >
+                {freeOnly ? 'Free only' : 'Any price'}
+              </button>
+              <button className="f-pill" onClick={() => navigate('/explore')}>
+                Filters
+              </button>
+            </div>
           </div>
         </section>
 
-        {/* TWO-COLUMN DASHBOARD GRID (Desktop) / STACKED (Tablet & Phone) */}
+        {/* TWO-COLUMN DASHBOARD GRID */}
         <div className="discover-grid">
           {/* LEFT COLUMN: SWIPE DECK */}
           <div className="swipe-column">
             <div className="deck-meta-bar">
               <span>CURATED FOR YOUR ENERGY</span>
               <span>
-                {filteredEvents.length > 0
+                {filteredEvents.length > 0 && currentCard
                   ? `${String(currentIndex + 1).padStart(2, '0')} / ${String(filteredEvents.length).padStart(2, '0')}`
                   : '00 / 00'}
               </span>
             </div>
 
             <div className="card-stack-stage">
-              {/* Background Next Card for Depth */}
               {nextCard && (
                 <div
                   className="swipe-card next-card-preview"
@@ -434,7 +557,6 @@ const handleAcceptSurprise = () => {
                 />
               )}
 
-              {/* Active Top Swipe Card */}
               {currentCard ? (
                 <div
                   className={`swipe-card active-card ${animClass}`}
@@ -447,19 +569,17 @@ const handleAcceptSurprise = () => {
                   onPointerUp={handlePointerUp}
                   onPointerLeave={handlePointerUp}
                 >
-                  {/* Dynamic Drag Stamps */}
                   {dragOffset.x > 25 && (
                     <div className="swipe-stamp stamp-in" style={{ opacity: dragStampOpacity }}>
-                      I'M IN ♡
+                      I'M IN
                     </div>
                   )}
                   {dragOffset.x < -25 && (
                     <div className="swipe-stamp stamp-pass" style={{ opacity: dragStampOpacity }}>
-                      PASS ✕
+                      PASS
                     </div>
                   )}
 
-                  {/* Top Badges */}
                   <div className="card-top-Row">
                     <span className="tonight-pick-badge">{currentCard.pickLabel}</span>
                     <span className="cover-price-badge">
@@ -467,7 +587,6 @@ const handleAcceptSurprise = () => {
                     </span>
                   </div>
 
-                  {/* Bottom Details */}
                   <div className="card-bottom-content">
                     <div className="card-tags">
                       {currentCard.tags.map((tag) => (
@@ -475,7 +594,7 @@ const handleAcceptSurprise = () => {
                           {tag}
                         </span>
                       ))}
-                      <span className="tag-chip spots-chip">🔥 {currentCard.spotsLeft} spots left</span>
+                      <span className="tag-chip spots-chip">{currentCard.spotsLeft} spots left</span>
                     </div>
 
                     <h2>{currentCard.title}</h2>
@@ -483,8 +602,10 @@ const handleAcceptSurprise = () => {
 
                     <div className="card-meta-bottom">
                       <div className="meta-lines">
-                        <span>📍 {currentCard.venue} • {currentCard.distance}</span>
-                        <span>🕒 {currentCard.time}</span>
+                        <span>
+                          {currentCard.venue} • {currentCard.distance}
+                        </span>
+                        <span>{currentCard.time}</span>
                       </div>
 
                       <button
@@ -502,16 +623,24 @@ const handleAcceptSurprise = () => {
                 </div>
               ) : (
                 <div className="empty-deck-box">
-                  <h3>That's the whole lineup for tonight.</h3>
-                  <p>Rewind your last pass or reset the deck to browse again.</p>
-                  <button className="surprise-btn" onClick={() => setCurrentIndex(0)}>
-                    Reset Deck
+                  <h3>No plots match that filter tonight.</h3>
+                  <p>Reset your search or switch cities to keep swiping.</p>
+                  <button
+                    className="surprise-btn"
+                    onClick={() => {
+                      setCurrentIndex(0);
+                      setSearchQuery('');
+                      setActiveVibe('All vibes');
+                      setFreeOnly(false);
+                      setSelectedLocation('All Locations');
+                    }}
+                  >
+                    Reset Deck & Filters
                   </button>
                 </div>
               )}
             </div>
 
-            {/* SWIPE CONTROLS (Undo, Pass, I'm In) */}
             <div className="deck-controls-wrap">
               <div className="deck-buttons">
                 <button
@@ -546,7 +675,7 @@ const handleAcceptSurprise = () => {
                 </div>
               </div>
 
-              <p className="keyboard-hint">← Pass  •  Save →</p>
+              <p className="keyboard-hint">← Pass • Save →</p>
             </div>
           </div>
 
@@ -563,7 +692,7 @@ const handleAcceptSurprise = () => {
             </div>
 
             <div className="nearby-cards-list">
-              {events.slice(1, 3).map((item) => (
+              {(filteredEvents.length > 0 ? filteredEvents : events).slice(0, 2).map((item) => (
                 <div
                   key={item.id}
                   className="nearby-mini-card"
@@ -592,7 +721,6 @@ const handleAcceptSurprise = () => {
               <span>→</span>
             </button>
 
-            {/* BOTTOM PROMO GRID (Purple Card + Mobile/Tablet Host Card) */}
             <div className="promo-bento-grid">
               <div className="no-plans-card" onClick={handleSurpriseMe}>
                 <div className="no-plans-content">
@@ -602,7 +730,6 @@ const handleAcceptSurprise = () => {
                     The best nights usually start that way. Let a little luck pick where you end up.
                   </p>
                 </div>
-                <span className="sparkle-icon">✦</span>
               </div>
 
               <div className="host-cta-card responsive-host-card">
@@ -615,82 +742,109 @@ const handleAcceptSurprise = () => {
               </div>
             </div>
 
-            <p className="story-footnote">◎ Real events. Local energy. Always a good story.</p>
+            <p className="story-footnote">Real events. Local energy. Always a good story.</p>
           </div>
         </div>
 
-        {/* PAGE FOOTER */}
         <footer className="aftr-footer">
           <span>GOOD PEOPLE. GREAT NIGHTS.</span>
           <span>Discover spontaneously. Party responsibly. 21+</span>
         </footer>
       </div>
-      {surpriseModalOpen && surpriseEvent && (
-      <div className="surprise-modal-overlay" onClick={() => setSurpriseModalOpen(false)}>
-        <div className="surprise-modal-card" onClick={(e) => e.stopPropagation()}>
-          <button
-            className="surprise-close-btn"
-            onClick={() => setSurpriseModalOpen(false)}
-            aria-label="Close modal"
-          >
-            ✕
-          </button>
-          <div className="surprise-modal-header">
-            <div className="surprise-criteria-row">
-            <button
-              className={`crit-pill ${surpriseCriteria === 'best' ? 'active' : ''}`}
-              onClick={() => pickSuitableEvent('best')}
-            >
-              🔥 Best Overall
-            </button>
-            <button
-              className={`crit-pill ${surpriseCriteria === 'closest' ? 'active' : ''}`}
-              onClick={() => pickSuitableEvent('closest')}
-            >
-              📍 Closest to Me
-            </button>
-            <button
-              className={`crit-pill ${surpriseCriteria === 'budget' ? 'active' : ''}`}
-              onClick={() => pickSuitableEvent('budget')}
-            >
-               Under $15 / Free
-            </button>
-          </div>
 
-          <div
-            className={`surprise-result-box ${isRolling ? 'rolling-blur' : 'locked-pop'}`}
-            style={{
-              backgroundImage: `linear-gradient(180deg, rgba(11,12,14,0.15) 0%, rgba(11,12,14,0.96) 80%), url(${surpriseEvent.image})`
-            }}
-          >
-            <div className="card-top-Row">
-              <span className="tonight-pick-badge">98% VIBE MATCH</span>
-              <span className="cover-price-badge">
-                {surpriseEvent.price === 0 ? 'Free Entry' : `$${surpriseEvent.price} cover`}
-              </span>
+      {/* ================= SURPRISE ME POPUP MODAL ================= */}
+      {surpriseModalOpen && surpriseEvent && (
+        <div className="surprise-modal-overlay" onClick={() => setSurpriseModalOpen(false)}>
+          <div className="surprise-modal-card" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="surprise-close-btn"
+              onClick={() => setSurpriseModalOpen(false)}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+
+            <div className="surprise-modal-header">
+              <span className="energy-pill">TONIGHT'S FATE PICKER</span>
+              <h2>{isRolling ? 'Scanning tonight’s energy...' : 'We found your spot.'}</h2>
+              <p>Pick your vibe priority or let luck decide where you end up.</p>
             </div>
-            <div className="surprise-result-info">
-              <div className="card-tags">
-                {surpriseEvent.tags.map((tag) => (
-                  <span key={tag} className="tag-chip">{tag}</span>
-                ))}
-                <span className="tag-chip spots-chip">🔥 {surpriseEvent.spotsLeft} spots left</span>
+
+            <div className="surprise-criteria-row">
+              <button
+                className={`crit-pill ${surpriseCriteria === 'best' ? 'active' : ''}`}
+                onClick={() => pickSuitableEvent('best')}
+              >
+                Best Overall
+              </button>
+              <button
+                className={`crit-pill ${surpriseCriteria === 'closest' ? 'active' : ''}`}
+                onClick={() => pickSuitableEvent('closest')}
+              >
+                Closest to Me
+              </button>
+              <button
+                className={`crit-pill ${surpriseCriteria === 'budget' ? 'active' : ''}`}
+                onClick={() => pickSuitableEvent('budget')}
+              >
+                Under $15 / Free
+              </button>
+            </div>
+
+            <div
+              className={`surprise-result-box ${isRolling ? 'rolling-blur' : 'locked-pop'}`}
+              style={{
+                backgroundImage: `linear-gradient(180deg, rgba(11,12,14,0.15) 0%, rgba(11,12,14,0.96) 80%), url(${surpriseEvent.image})`
+              }}
+            >
+              <div className="card-top-Row">
+                <span className="tonight-pick-badge">98% VIBE MATCH</span>
+                <span className="cover-price-badge">
+                  {surpriseEvent.price === 0 ? 'Free Entry' : `$${surpriseEvent.price} cover`}
+                </span>
               </div>
-              <h3>{surpriseEvent.title}</h3>
-              <p>{surpriseEvent.subtitle}</p>
-              <div className="surprise-meta">
-                <span> {surpriseEvent.venue} ({surpriseEvent.distance})</span>
-                <span> {surpriseEvent.time}</span>
+
+              <div className="surprise-result-info">
+                <div className="card-tags">
+                  {surpriseEvent.tags.map((tag) => (
+                    <span key={tag} className="tag-chip">
+                      {tag}
+                    </span>
+                  ))}
+                  <span className="tag-chip spots-chip">{surpriseEvent.spotsLeft} spots left</span>
+                </div>
+
+                <h3>{surpriseEvent.title}</h3>
+                <p>{surpriseEvent.subtitle}</p>
+
+                <div className="surprise-meta">
+                  <span>
+                    {surpriseEvent.venue} ({surpriseEvent.distance})
+                  </span>
+                  <span>{surpriseEvent.time}</span>
+                </div>
               </div>
             </div>
-          </div>
-            <span className="energy-pill">✦ TONIGHT'S FATE PICKER</span>
-            <h2>{isRolling ? 'Scanning tonight’s energy...' : 'We found your spot.'}</h2>
-            <p>Pick your vibe priority or let luck decide where you end up.</p>
+
+            <div className="surprise-modal-actions">
+              <button
+                className="reroll-btn"
+                onClick={() => pickSuitableEvent(surpriseCriteria)}
+                disabled={isRolling}
+              >
+                Spin Again
+              </button>
+              <button
+                className="accept-surprise-btn"
+                onClick={handleAcceptSurprise}
+                disabled={isRolling}
+              >
+                I'm In — Lock Spot
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </div>
   );
 }
