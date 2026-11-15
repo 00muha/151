@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1000&auto=format&fit=crop&q=80';
+
 const PARTY_IMAGES = [
   'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1000&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1571266028243-cb40fce756fd?w=1000&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1000&auto=format&fit=crop&q=80',
   'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1000&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1000&auto=format&fit=crop&q=80',
   'https://images.unsplash.com/photo-1545128485-c400e7702796?w=1000&auto=format&fit=crop&q=80',
   'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=1000&auto=format&fit=crop&q=80',
   'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1000&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=1000&auto=format&fit=crop&q=80'
+  'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=1000&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=1000&auto=format&fit=crop&q=80'
 ];
 
 function generate60TonightEvents() {
@@ -410,597 +413,598 @@ export default function DiscoverPage() {
   const nearbyListSource = filteredEvents.length > 0 ? filteredEvents : events;
 
   return (
-    <div className="min-h-screen w-full bg-[#0b0c0e] text-[#f5f6f8] flex justify-center overflow-x-hidden">
-      {/* Constrained Shell so Sidebar and Main Content stay compact together */}
-      <div className="w-full max-w-[1180px] flex min-h-screen">
-        {/* ================= LEFT SIDEBAR (Desktop lg: 220px) ================= */}
-        <aside className="hidden lg:flex w-[220px] bg-[#0e1013] border-r border-white/[0.08] px-4 py-6 flex-col shrink-0 sticky top-0 h-screen">
-          <div className="px-1">
-            <div className="text-[26px] font-extrabold tracking-tight leading-none">
+    <div className="min-h-screen w-full bg-[#0b0c0e] text-[#f5f6f8] flex overflow-x-hidden">
+      {/* ================= LEFT SIDEBAR (Pinned Flush Left on Desktop lg+) ================= */}
+      <aside className="hidden lg:flex w-[240px] xl:w-[260px] bg-[#0e1013] border-r border-white/[0.08] px-5 py-6 flex-col shrink-0 sticky top-0 h-screen">
+        <div className="px-1">
+          <div className="text-[28px] font-extrabold tracking-tight leading-none">
+            aftr<span className="text-[#d2ff38]">.</span>
+          </div>
+          <p className="text-[9px] tracking-[1.4px] text-[#8b909a] mt-1.5">
+            GO OUT. FIND YOUR PEOPLE.
+          </p>
+        </div>
+
+        <nav className="mt-8 flex flex-col gap-1.5">
+          <button className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-semibold bg-[#1e2418] text-[#d2ff38] cursor-pointer">
+            <span>Discover</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/my-tickets')}
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium text-[#8b909a] hover:text-white hover:bg-white/[0.04] transition cursor-pointer"
+          >
+            <span>Saved nights</span>
+            <span className="bg-white/10 text-white text-[10px] px-2 py-0.5 rounded-full">
+              {savedParties.length} • {formatKsh(totalSavedKsh)}
+            </span>
+          </button>
+
+          <button
+            onClick={() => navigate('/my-tickets')}
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium text-[#8b909a] hover:text-white hover:bg-white/[0.04] transition cursor-pointer"
+          >
+            <span>My tickets</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/explore')}
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium text-[#8b909a] hover:text-white hover:bg-white/[0.04] transition cursor-pointer"
+          >
+            <span>Explore map</span>
+          </button>
+        </nav>
+
+        <div className="mt-auto mb-5 bg-gradient-to-br from-[#1b2116] to-[#141812] border border-[#d2ff38]/20 rounded-2xl p-4">
+          <h4 className="text-[14px] font-bold mb-1">Make it a night.</h4>
+          <p className="text-[11px] text-[#8b909a] leading-snug mb-3">
+            Bring your people together. We'll bring the good vibes.
+          </p>
+          <button
+            onClick={() => navigate('/host')}
+            className="w-full flex items-center justify-between text-[#d2ff38] text-[12px] font-semibold cursor-pointer hover:underline"
+          >
+            <span>Host a party</span>
+            <span>→</span>
+          </button>
+        </div>
+
+        <div className="border-t border-white/[0.08] pt-4 flex flex-col gap-3">
+          <button
+            onClick={() => navigate('/help')}
+            className="text-[11px] text-[#8b909a] text-left hover:text-white cursor-pointer"
+          >
+            Help & feedback
+          </button>
+          <div className="flex items-center gap-2.5">
+            <img
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120"
+              alt="Jamie Miller"
+              className="w-8 h-8 rounded-full object-cover"
+            />
+            <div>
+              <strong className="block text-[12px] font-semibold leading-tight">Jamie Miller</strong>
+              <span className="text-[10px] text-[#8b909a]">Your next story awaits</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* ================= MAIN WORKSPACE (Full Width, Flush Next to Sidebar) ================= */}
+      <div className="flex-1 flex flex-col px-4 py-4 sm:px-7 sm:py-5 lg:px-10 lg:py-6 min-w-0">
+        {/* TOP HEADER BAR */}
+        <header className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
+          <div className="flex items-center gap-3" ref={locationDropdownRef}>
+            <span className="lg:hidden text-[22px] font-extrabold tracking-tight">
               aftr<span className="text-[#d2ff38]">.</span>
-            </div>
-            <p className="text-[9px] tracking-[1.4px] text-[#8b909a] mt-1">
-              GO OUT. FIND YOUR PEOPLE.
-            </p>
-          </div>
+            </span>
 
-          <nav className="mt-7 flex flex-col gap-1.5">
-            <button className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-semibold bg-[#1e2418] text-[#d2ff38] cursor-pointer">
-              <span>Discover</span>
-            </button>
-
-            <button
-              onClick={() => navigate('/my-tickets')}
-              className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium text-[#8b909a] hover:text-white hover:bg-white/[0.04] transition cursor-pointer"
-            >
-              <span>Saved nights</span>
-              <span className="bg-white/10 text-white text-[10px] px-2 py-0.5 rounded-full">
-                {savedParties.length} • {formatKsh(totalSavedKsh)}
-              </span>
-            </button>
-
-            <button
-              onClick={() => navigate('/my-tickets')}
-              className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium text-[#8b909a] hover:text-white hover:bg-white/[0.04] transition cursor-pointer"
-            >
-              <span>My tickets</span>
-            </button>
-
-            <button
-              onClick={() => navigate('/explore')}
-              className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium text-[#8b909a] hover:text-white hover:bg-white/[0.04] transition cursor-pointer"
-            >
-              <span>Explore map</span>
-            </button>
-          </nav>
-
-          <div className="mt-auto mb-5 bg-gradient-to-br from-[#1b2116] to-[#141812] border border-[#d2ff38]/20 rounded-2xl p-4">
-            <h4 className="text-[14px] font-bold mb-1">Make it a night.</h4>
-            <p className="text-[11px] text-[#8b909a] leading-snug mb-3">
-              Bring your people together. We'll bring the good vibes.
-            </p>
-            <button
-              onClick={() => navigate('/host')}
-              className="w-full flex items-center justify-between text-[#d2ff38] text-[12px] font-semibold cursor-pointer hover:underline"
-            >
-              <span>Host a party</span>
-              <span>→</span>
-            </button>
-          </div>
-
-          <div className="border-t border-white/[0.08] pt-3.5 flex flex-col gap-3">
-            <button
-              onClick={() => navigate('/help')}
-              className="text-[11px] text-[#8b909a] text-left hover:text-white cursor-pointer"
-            >
-              Help & feedback
-            </button>
-            <div className="flex items-center gap-2.5">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120"
-                alt="Jamie Miller"
-                className="w-8 h-8 rounded-full object-cover"
-              />
-              <div>
-                <strong className="block text-[12px] font-semibold leading-tight">Jamie Miller</strong>
-                <span className="text-[10px] text-[#8b909a]">Your next story awaits</span>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* ================= MAIN WORKSPACE ================= */}
-        <div className="flex-1 flex flex-col px-3.5 py-3.5 sm:px-6 sm:py-4 lg:px-8 lg:py-5 max-w-[940px] w-full">
-          {/* TOP HEADER BAR */}
-          <header className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
-            <div className="flex items-center gap-3" ref={locationDropdownRef}>
-              <span className="lg:hidden text-[22px] font-extrabold tracking-tight">
-                aftr<span className="text-[#d2ff38]">.</span>
-              </span>
-
-              <div className="relative">
-                <button
-                  onClick={() => setLocationMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-1.5 text-[12px] sm:text-[13px] font-medium text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-3 py-1.5 rounded-full cursor-pointer transition"
+            <div className="relative">
+              <button
+                onClick={() => setLocationMenuOpen((prev) => !prev)}
+                className="flex items-center gap-1.5 text-[12px] sm:text-[13px] font-medium text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-3.5 py-1.5 rounded-full cursor-pointer transition"
+              >
+                <span>{selectedLocation}</span>
+                <span
+                  className={`inline-block text-[11px] transition-transform ${
+                    locationMenuOpen ? 'rotate-180 text-[#d2ff38]' : ''
+                  }`}
                 >
-                  <span>{selectedLocation}</span>
-                  <span
-                    className={`inline-block text-[11px] transition-transform ${
-                      locationMenuOpen ? 'rotate-180 text-[#d2ff38]' : ''
-                    }`}
-                  >
-                    ▾
-                  </span>
-                </button>
-
-                {locationMenuOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-[#14171d] border border-[#d2ff38]/30 rounded-2xl p-2 shadow-2xl z-50 flex flex-col gap-0.5">
-                    <span className="text-[10px] font-bold tracking-wider text-[#8b909a] px-2.5 py-1">
-                      SWITCH TONIGHT'S ZONE
-                    </span>
-                    {LOCATIONS.map((loc) => (
-                      <button
-                        key={loc}
-                        onClick={() => {
-                          setSelectedLocation(loc);
-                          setCurrentIndex(0);
-                          setLocationMenuOpen(false);
-                        }}
-                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-[12px] text-left cursor-pointer transition ${
-                          selectedLocation === loc
-                            ? 'bg-[#1e2418] text-[#d2ff38] font-semibold'
-                            : 'text-white hover:bg-white/5'
-                        }`}
-                      >
-                        <span>{loc}</span>
-                        {selectedLocation === loc && <span className="text-[#d2ff38] text-[10px]">●</span>}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3.5">
-              <span className="hidden lg:inline text-[12px] text-[#8b909a]">
-                A little spontaneous looks good on you.
-              </span>
-              <button
-                onClick={() => navigate('/notifications')}
-                className="relative bg-white/[0.05] border border-white/[0.08] px-3 py-1 rounded-full text-[11px] text-white cursor-pointer hover:bg-white/10"
-              >
-                Alerts
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#d2ff38] rounded-full" />
-              </button>
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120"
-                alt="Profile"
-                className="lg:hidden w-8 h-8 rounded-full object-cover"
-              />
-            </div>
-          </header>
-
-          {/* TABLET & MOBILE HORIZONTAL NAV BAR */}
-          <nav className="lg:hidden grid grid-cols-4 gap-1.5 py-2.5 border-b border-white/[0.08]">
-            <button className="flex flex-col items-center justify-center py-2 px-2 rounded-xl bg-[#1e2418] text-[#d2ff38] text-[11px] sm:text-[12px] font-semibold cursor-pointer">
-              <span>Discover</span>
-            </button>
-
-            <button
-              onClick={() => navigate('/my-tickets')}
-              className="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[#8b909a] hover:bg-white/5 text-[11px] sm:text-[12px] cursor-pointer"
-            >
-              <div className="flex items-center gap-1">
-                <span>Saved nights</span>
-                <span className="bg-white/15 text-white text-[10px] px-1.5 rounded-full">
-                  {savedParties.length}
+                  ▾
                 </span>
-              </div>
-              <span className="text-[10px] text-[#d2ff38] font-semibold">
-                {formatKsh(totalSavedKsh)}
-              </span>
-            </button>
-
-            <button
-              onClick={() => navigate('/my-tickets')}
-              className="flex flex-col items-center justify-center py-2 px-2 rounded-xl text-[#8b909a] hover:bg-white/5 text-[11px] sm:text-[12px] cursor-pointer"
-            >
-              <span>My tickets</span>
-            </button>
-
-            <button
-              onClick={() => navigate('/explore')}
-              className="flex flex-col items-center justify-center py-2 px-2 rounded-xl text-[#8b909a] hover:bg-white/5 text-[11px] sm:text-[12px] cursor-pointer"
-            >
-              <span>Explore map</span>
-            </button>
-          </nav>
-
-          {/* HERO TITLE + SURPRISE ME + COMPACT FILTER PILLS */}
-          <section className="my-4 sm:my-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3.5">
-              <div>
-                <h1 className="text-[24px] sm:text-[28px] font-bold tracking-tight leading-tight">
-                  Find your kind of night.
-                </h1>
-                <p className="text-[12px] sm:text-[13px] text-[#8b909a] mt-0.5">
-                  Less scrolling. More stories worth telling.
-                </p>
-              </div>
-
-              <button
-                onClick={handleSurpriseMe}
-                className="w-full sm:w-auto bg-[#d2ff38] text-[#0b0c0e] font-bold text-[13px] px-5 py-2.5 rounded-full hover:brightness-110 active:scale-95 transition cursor-pointer shadow-[0_6px_20px_rgba(210,255,56,0.28)]"
-              >
-                Surprise me
               </button>
+
+              {locationMenuOpen && (
+                <div className="absolute top-full left-0 mt-2 w-56 bg-[#14171d] border border-[#d2ff38]/30 rounded-2xl p-2 shadow-2xl z-50 flex flex-col gap-0.5">
+                  <span className="text-[10px] font-bold tracking-wider text-[#8b909a] px-2.5 py-1">
+                    SWITCH TONIGHT'S ZONE
+                  </span>
+                  {LOCATIONS.map((loc) => (
+                    <button
+                      key={loc}
+                      onClick={() => {
+                        setSelectedLocation(loc);
+                        setCurrentIndex(0);
+                        setLocationMenuOpen(false);
+                      }}
+                      className={`flex items-center justify-between px-3 py-2 rounded-xl text-[12px] text-left cursor-pointer transition ${
+                        selectedLocation === loc
+                          ? 'bg-[#1e2418] text-[#d2ff38] font-semibold'
+                          : 'text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <span>{loc}</span>
+                      {selectedLocation === loc && <span className="text-[#d2ff38] text-[10px]">●</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <span className="hidden lg:inline text-[12px] text-[#8b909a]">
+              A little spontaneous looks good on you.
+            </span>
+            <button
+              onClick={() => navigate('/notifications')}
+              className="relative bg-white/[0.05] border border-white/[0.08] px-3.5 py-1 rounded-full text-[11px] text-white cursor-pointer hover:bg-white/10"
+            >
+              Alerts
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#d2ff38] rounded-full" />
+            </button>
+            <img
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120"
+              alt="Profile"
+              className="lg:hidden w-8 h-8 rounded-full object-cover"
+            />
+          </div>
+        </header>
+
+        {/* TABLET & MOBILE HORIZONTAL NAV BAR */}
+        <nav className="lg:hidden grid grid-cols-4 gap-1.5 py-2.5 border-b border-white/[0.08]">
+          <button className="flex flex-col items-center justify-center py-2 px-2 rounded-xl bg-[#1e2418] text-[#d2ff38] text-[11px] sm:text-[12px] font-semibold cursor-pointer">
+            <span>Discover</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/my-tickets')}
+            className="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[#8b909a] hover:bg-white/5 text-[11px] sm:text-[12px] cursor-pointer"
+          >
+            <div className="flex items-center gap-1">
+              <span>Saved nights</span>
+              <span className="bg-white/15 text-white text-[10px] px-1.5 rounded-full">
+                {savedParties.length}
+              </span>
+            </div>
+            <span className="text-[10px] text-[#d2ff38] font-semibold">
+              {formatKsh(totalSavedKsh)}
+            </span>
+          </button>
+
+          <button
+            onClick={() => navigate('/my-tickets')}
+            className="flex flex-col items-center justify-center py-2 px-2 rounded-xl text-[#8b909a] hover:bg-white/5 text-[11px] sm:text-[12px] cursor-pointer"
+          >
+            <span>My tickets</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/explore')}
+            className="flex flex-col items-center justify-center py-2 px-2 rounded-xl text-[#8b909a] hover:bg-white/5 text-[11px] sm:text-[12px] cursor-pointer"
+          >
+            <span>Explore map</span>
+          </button>
+        </nav>
+
+        {/* HERO TITLE + SURPRISE ME + FILTER PILLS */}
+        <section className="my-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3.5">
+            <div>
+              <h1 className="text-[26px] sm:text-[30px] font-bold tracking-tight leading-tight">
+                Find your kind of night.
+              </h1>
+              <p className="text-[12px] sm:text-[13px] text-[#8b909a] mt-0.5">
+                Less scrolling. More stories worth telling.
+              </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center bg-[#14171c] border border-white/[0.08] focus-within:border-[#d2ff38]/60 rounded-full px-3.5 py-1.5 w-full sm:w-56">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
+            <button
+              onClick={handleSurpriseMe}
+              className="w-full sm:w-auto bg-[#d2ff38] text-[#0b0c0e] font-bold text-[13px] px-6 py-2.5 rounded-full hover:brightness-110 active:scale-95 transition cursor-pointer shadow-[0_6px_20px_rgba(210,255,56,0.28)]"
+            >
+              Surprise me
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center bg-[#14171c] border border-white/[0.08] focus-within:border-[#d2ff38]/60 rounded-full px-3.5 py-1.5 w-full sm:w-60">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentIndex(0);
+                }}
+                placeholder="Search party, venue, vibe..."
+                className="bg-transparent border-none outline-none text-[12px] text-white placeholder-[#8b909a] w-full"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
                     setCurrentIndex(0);
                   }}
-                  placeholder="Search party, venue, vibe..."
-                  className="bg-transparent border-none outline-none text-[12px] text-white placeholder-[#8b909a] w-full"
+                  className="text-[11px] text-[#8b909a] hover:text-white ml-1.5 cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <button className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold bg-[#1e2418] text-[#d2ff38] border border-[#d2ff38]/40 cursor-pointer">
+              Tonight
+            </button>
+
+            <button
+              onClick={() => {
+                setWithin5Km(!within5Km);
+                setCurrentIndex(0);
+              }}
+              className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border transition cursor-pointer ${
+                within5Km
+                  ? 'bg-[#1e2418] text-[#d2ff38] border-[#d2ff38]/40'
+                  : 'bg-[#15181d] text-[#8b909a] border-white/[0.08] hover:text-white'
+              }`}
+            >
+              Within 5 km
+            </button>
+
+            <button
+              onClick={() => {
+                const vibes = ['All vibes', 'House', 'Techno', 'Amapiano', 'Disco', 'Afrobeats', 'Rooftop'];
+                const next = vibes[(vibes.indexOf(activeVibe) + 1) % vibes.length];
+                setActiveVibe(next);
+                setCurrentIndex(0);
+              }}
+              className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border transition cursor-pointer ${
+                activeVibe !== 'All vibes'
+                  ? 'bg-[#1e2418] text-[#d2ff38] border-[#d2ff38]/40'
+                  : 'bg-[#15181d] text-[#8b909a] border-white/[0.08] hover:text-white'
+              }`}
+            >
+              {activeVibe}
+            </button>
+
+            <button
+              onClick={() => {
+                setFreeOnly(!freeOnly);
+                setCurrentIndex(0);
+              }}
+              className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border transition cursor-pointer ${
+                freeOnly
+                  ? 'bg-[#1e2418] text-[#d2ff38] border-[#d2ff38]/40'
+                  : 'bg-[#15181d] text-[#8b909a] border-white/[0.08] hover:text-white'
+              }`}
+            >
+              {freeOnly ? 'Free only' : 'Any price'}
+            </button>
+
+            <button
+              onClick={() => navigate('/explore')}
+              className="px-3.5 py-1.5 rounded-full text-[12px] font-medium bg-[#15181d] text-[#8b909a] border border-white/[0.08] hover:text-white cursor-pointer"
+            >
+              Filters
+            </button>
+          </div>
+        </section>
+
+        {/* ================= RESPONSIVE 2-COLUMN DASHBOARD GRID ================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] xl:grid-cols-[1.18fr_0.82fr] gap-7 xl:gap-10 items-start flex-1">
+          {/* LEFT COLUMN: SWIPE DECK */}
+          <div className="w-full max-w-[540px] mx-auto lg:max-w-none lg:mx-0">
+            <div className="flex justify-between text-[10px] tracking-[1.2px] text-[#8b909a] mb-2">
+              <span>CURATED FOR YOUR ENERGY</span>
+              <span>
+                {filteredEvents.length > 0 && currentCard
+                  ? `${String(currentIndex + 1).padStart(2, '0')} / ${String(filteredEvents.length).padStart(2, '0')}`
+                  : '00 / 00'}
+              </span>
+            </div>
+
+            {/* Card Stack Stage */}
+            <div className="relative w-full h-[400px] sm:h-[440px]">
+              {nextCard && (
+                <div
+                  className="absolute inset-0 rounded-[22px] bg-cover bg-center border border-white/10 scale-[0.96] translate-y-3 opacity-55 brightness-75 transition-all duration-300"
+                  style={{
+                    backgroundImage: `linear-gradient(180deg, rgba(10,10,14,0.15) 0%, rgba(10,10,14,0.92) 85%), url(${nextCard.image})`
+                  }}
                 />
-                {searchQuery && (
+              )}
+
+              {currentCard ? (
+                <div
+                  style={{
+                    backgroundImage: `linear-gradient(180deg, rgba(10,10,14,0.1) 0%, rgba(10,10,14,0.95) 82%), url(${currentCard.image})`,
+                    ...getCardTransform()
+                  }}
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerLeave={handlePointerUp}
+                  className="absolute inset-0 z-10 rounded-[22px] bg-cover bg-center p-5 sm:p-6 flex flex-col justify-between border border-white/[0.12] shadow-[0_18px_40px_rgba(0,0,0,0.65)] select-none touch-pan-y cursor-grab active:cursor-grabbing"
+                >
+                  {dragOffset.x > 25 && (
+                    <div
+                      style={{ opacity: dragStampOpacity }}
+                      className="absolute top-14 left-5 border-2 border-[#d2ff38] text-[#d2ff38] bg-black/70 px-3.5 py-1 rounded-lg text-lg font-black tracking-widest -rotate-12 pointer-events-none"
+                    >
+                      I'M IN
+                    </div>
+                  )}
+                  {dragOffset.x < -25 && (
+                    <div
+                      style={{ opacity: dragStampOpacity }}
+                      className="absolute top-14 right-5 border-2 border-red-500 text-red-500 bg-black/70 px-3.5 py-1 rounded-lg text-lg font-black tracking-widest rotate-12 pointer-events-none"
+                    >
+                      PASS
+                    </div>
+                  )}
+
+                  {/* Top Badges */}
+                  <div className="flex items-center justify-between">
+                    <span className="bg-[#d2ff38] text-[#0b0c0e] text-[10px] font-extrabold px-3 py-1 rounded-full">
+                      {currentCard.pickLabel}
+                    </span>
+                    <span className="bg-black/75 backdrop-blur-md text-white text-[11px] font-semibold px-3 py-1 rounded-full border border-white/15">
+                      {currentCard.price === 0 ? 'Free' : `${formatKsh(currentCard.price)} cover`}
+                    </span>
+                  </div>
+
+                  {/* Bottom Card Info */}
+                  <div>
+                    <div className="flex flex-wrap gap-1.5 mb-2.5">
+                      {currentCard.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="bg-white/15 backdrop-blur-md text-white text-[11px] px-2.5 py-0.5 rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      <span className="bg-[#d2ff38]/20 text-[#d2ff38] border border-[#d2ff38]/35 text-[11px] px-2.5 py-0.5 rounded-full font-semibold">
+                        {currentCard.spotsLeft} spots left
+                      </span>
+                    </div>
+
+                    <h2 className="text-[26px] sm:text-[32px] font-extrabold tracking-tight leading-tight mb-1">
+                      {currentCard.title}
+                    </h2>
+                    <p className="text-[12px] sm:text-[13px] text-gray-300 mb-3.5">
+                      {currentCard.subtitle}
+                    </p>
+
+                    <div className="flex items-end justify-between">
+                      <div className="flex flex-col gap-0.5 text-[12px] text-gray-300">
+                        <span>
+                          {currentCard.venue} • {currentCard.distance}
+                        </span>
+                        <span>{currentCard.time}</span>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/events/${currentCard.id}`);
+                        }}
+                        title="View event details"
+                        className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#d2ff38] hover:text-[#0b0c0e] border border-white/20 text-white text-sm flex items-center justify-center transition cursor-pointer"
+                      >
+                        →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full rounded-[22px] bg-[#131519] border border-dashed border-white/15 flex flex-col items-center justify-center text-center p-6 gap-2.5">
+                  <h3 className="text-base font-bold">No plots match that filter tonight.</h3>
+                  <p className="text-xs text-[#8b909a]">
+                    Reset your search or switch zones to keep swiping all 60 places.
+                  </p>
                   <button
                     onClick={() => {
-                      setSearchQuery('');
                       setCurrentIndex(0);
+                      setSearchQuery('');
+                      setActiveVibe('All vibes');
+                      setFreeOnly(false);
+                      setWithin5Km(false);
+                      setSelectedLocation('All Nairobi Zones');
                     }}
-                    className="text-[11px] text-[#8b909a] hover:text-white ml-1.5 cursor-pointer"
+                    className="mt-1 bg-[#d2ff38] text-[#0b0c0e] font-bold text-xs px-4 py-2 rounded-full cursor-pointer"
+                  >
+                    Reset Deck
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Swipe Action Buttons */}
+            <div className="flex flex-col items-center mt-4">
+              <div className="flex items-start gap-5">
+                <button
+                  onClick={handleUndo}
+                  disabled={history.length === 0}
+                  title="Undo last swipe"
+                  className="w-11 h-11 mt-2 rounded-full bg-[#15181e] border border-white/[0.12] text-white/80 hover:text-white disabled:opacity-35 flex items-center justify-center text-base cursor-pointer transition active:scale-90"
+                >
+                  ↺
+                </button>
+
+                <div className="flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => triggerSwipe('left')}
+                    disabled={!currentCard}
+                    className="w-14 h-14 rounded-full bg-[#171a20] border border-white/[0.1] text-white flex items-center justify-center text-lg cursor-pointer transition hover:bg-white/10 active:scale-90"
                   >
                     ✕
                   </button>
-                )}
-              </div>
+                  <span className="text-[9px] font-bold tracking-widest text-[#8b909a]">PASS</span>
+                </div>
 
-              <button className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold bg-[#1e2418] text-[#d2ff38] border border-[#d2ff38]/40 cursor-pointer">
-                Tonight
-              </button>
-
-              <button
-                onClick={() => {
-                  setWithin5Km(!within5Km);
-                  setCurrentIndex(0);
-                }}
-                className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border transition cursor-pointer ${
-                  within5Km
-                    ? 'bg-[#1e2418] text-[#d2ff38] border-[#d2ff38]/40'
-                    : 'bg-[#15181d] text-[#8b909a] border-white/[0.08] hover:text-white'
-                }`}
-              >
-                Within 5 km
-              </button>
-
-              <button
-                onClick={() => {
-                  const vibes = ['All vibes', 'House', 'Techno', 'Amapiano', 'Disco', 'Afrobeats', 'Rooftop'];
-                  const next = vibes[(vibes.indexOf(activeVibe) + 1) % vibes.length];
-                  setActiveVibe(next);
-                  setCurrentIndex(0);
-                }}
-                className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border transition cursor-pointer ${
-                  activeVibe !== 'All vibes'
-                    ? 'bg-[#1e2418] text-[#d2ff38] border-[#d2ff38]/40'
-                    : 'bg-[#15181d] text-[#8b909a] border-white/[0.08] hover:text-white'
-                }`}
-              >
-                {activeVibe}
-              </button>
-
-              <button
-                onClick={() => {
-                  setFreeOnly(!freeOnly);
-                  setCurrentIndex(0);
-                }}
-                className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border transition cursor-pointer ${
-                  freeOnly
-                    ? 'bg-[#1e2418] text-[#d2ff38] border-[#d2ff38]/40'
-                    : 'bg-[#15181d] text-[#8b909a] border-white/[0.08] hover:text-white'
-                }`}
-              >
-                {freeOnly ? 'Free only' : 'Any price'}
-              </button>
-
-              <button
-                onClick={() => navigate('/explore')}
-                className="px-3.5 py-1.5 rounded-full text-[12px] font-medium bg-[#15181d] text-[#8b909a] border border-white/[0.08] hover:text-white cursor-pointer"
-              >
-                Filters
-              </button>
-            </div>
-          </section>
-
-          {/* ================= 2-COLUMN MAIN GRID (Matches Original CSS Proportions) ================= */}
-          <div className="grid grid-cols-1 lg:grid-cols-[440px_1fr] gap-6 lg:gap-7 items-start">
-            {/* LEFT COLUMN: SWIPE DECK (Centered on Tablet like Figma 834px frame) */}
-            <div className="w-full max-w-[440px] mx-auto lg:mx-0">
-              <div className="flex justify-between text-[10px] tracking-[1.2px] text-[#8b909a] mb-2">
-                <span>CURATED FOR YOUR ENERGY</span>
-                <span>
-                  {filteredEvents.length > 0 && currentCard
-                    ? `${String(currentIndex + 1).padStart(2, '0')} / ${String(filteredEvents.length).padStart(2, '0')}`
-                    : '00 / 00'}
-                </span>
-              </div>
-
-              {/* Card Stack Stage: 390px on phone, 425px on tablet/desktop */}
-              <div className="relative w-full h-[390px] sm:h-[425px]">
-                {nextCard && (
-                  <div
-                    className="absolute inset-0 rounded-[22px] bg-cover bg-center border border-white/10 scale-[0.95] translate-y-3 opacity-55 brightness-75 transition-all duration-300"
-                    style={{
-                      backgroundImage: `linear-gradient(180deg, rgba(10,10,14,0.15) 0%, rgba(10,10,14,0.92) 85%), url(${nextCard.image})`
-                    }}
-                  />
-                )}
-
-                {currentCard ? (
-                  <div
-                    style={{
-                      backgroundImage: `linear-gradient(180deg, rgba(10,10,14,0.1) 0%, rgba(10,10,14,0.95) 82%), url(${currentCard.image})`,
-                      ...getCardTransform()
-                    }}
-                    onPointerDown={handlePointerDown}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerUp}
-                    onPointerLeave={handlePointerUp}
-                    className="absolute inset-0 z-10 rounded-[22px] bg-cover bg-center p-4 sm:p-5 flex flex-col justify-between border border-white/[0.12] shadow-[0_18px_40px_rgba(0,0,0,0.65)] select-none touch-pan-y cursor-grab active:cursor-grabbing"
-                  >
-                    {dragOffset.x > 25 && (
-                      <div
-                        style={{ opacity: dragStampOpacity }}
-                        className="absolute top-14 left-5 border-2 border-[#d2ff38] text-[#d2ff38] bg-black/70 px-3.5 py-1 rounded-lg text-lg font-black tracking-widest -rotate-12 pointer-events-none"
-                      >
-                        I'M IN
-                      </div>
-                    )}
-                    {dragOffset.x < -25 && (
-                      <div
-                        style={{ opacity: dragStampOpacity }}
-                        className="absolute top-14 right-5 border-2 border-red-500 text-red-500 bg-black/70 px-3.5 py-1 rounded-lg text-lg font-black tracking-widest rotate-12 pointer-events-none"
-                      >
-                        PASS
-                      </div>
-                    )}
-
-                    {/* Top Badges */}
-                    <div className="flex items-center justify-between">
-                      <span className="bg-[#d2ff38] text-[#0b0c0e] text-[10px] font-extrabold px-3 py-1 rounded-full">
-                        {currentCard.pickLabel}
-                      </span>
-                      <span className="bg-black/75 backdrop-blur-md text-white text-[11px] font-semibold px-3 py-1 rounded-full border border-white/15">
-                        {currentCard.price === 0 ? 'Free' : `${formatKsh(currentCard.price)} cover`}
-                      </span>
-                    </div>
-
-                    {/* Bottom Card Info */}
-                    <div>
-                      <div className="flex flex-wrap gap-1.5 mb-2">
-                        {currentCard.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="bg-white/15 backdrop-blur-md text-white text-[11px] px-2.5 py-0.5 rounded-full"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        <span className="bg-[#d2ff38]/20 text-[#d2ff38] border border-[#d2ff38]/35 text-[11px] px-2.5 py-0.5 rounded-full font-semibold">
-                          {currentCard.spotsLeft} spots left
-                        </span>
-                      </div>
-
-                      <h2 className="text-[24px] sm:text-[30px] font-extrabold tracking-tight leading-tight mb-1">
-                        {currentCard.title}
-                      </h2>
-                      <p className="text-[12px] sm:text-[13px] text-gray-300 mb-3">
-                        {currentCard.subtitle}
-                      </p>
-
-                      <div className="flex items-end justify-between">
-                        <div className="flex flex-col gap-0.5 text-[12px] text-gray-300">
-                          <span>
-                            {currentCard.venue} • {currentCard.distance}
-                          </span>
-                          <span>{currentCard.time}</span>
-                        </div>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/events/${currentCard.id}`);
-                          }}
-                          title="View event details"
-                          className="w-9 h-9 rounded-full bg-white/15 hover:bg-[#d2ff38] hover:text-[#0b0c0e] border border-white/20 text-white text-sm flex items-center justify-center transition cursor-pointer"
-                        >
-                          →
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-full rounded-[22px] bg-[#131519] border border-dashed border-white/15 flex flex-col items-center justify-center text-center p-6 gap-2.5">
-                    <h3 className="text-base font-bold">No plots match that filter tonight.</h3>
-                    <p className="text-xs text-[#8b909a]">
-                      Reset your search or switch zones to keep swiping all 60 places.
-                    </p>
-                    <button
-                      onClick={() => {
-                        setCurrentIndex(0);
-                        setSearchQuery('');
-                        setActiveVibe('All vibes');
-                        setFreeOnly(false);
-                        setWithin5Km(false);
-                        setSelectedLocation('All Nairobi Zones');
-                      }}
-                      className="mt-1 bg-[#d2ff38] text-[#0b0c0e] font-bold text-xs px-4 py-2 rounded-full cursor-pointer"
-                    >
-                      Reset Deck
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Compact Swipe Buttons */}
-              <div className="flex flex-col items-center mt-4">
-                <div className="flex items-start gap-5">
+                <div className="flex flex-col items-center gap-1">
                   <button
-                    onClick={handleUndo}
-                    disabled={history.length === 0}
-                    title="Undo last swipe"
-                    className="w-10 h-10 mt-2 rounded-full bg-[#15181e] border border-white/[0.08] text-[#8b909a] hover:text-white disabled:opacity-40 flex items-center justify-center text-base cursor-pointer transition active:scale-90"
+                    onClick={() => triggerSwipe('right')}
+                    disabled={!currentCard}
+                    className="w-16 h-16 rounded-full bg-[#d2ff38] text-[#0b0c0e] flex items-center justify-center text-xl font-bold cursor-pointer shadow-[0_6px_20px_rgba(210,255,56,0.3)] transition hover:brightness-110 active:scale-90"
                   >
-                    ↺
+                    ♡
                   </button>
-
-                  <div className="flex flex-col items-center gap-1">
-                    <button
-                      onClick={() => triggerSwipe('left')}
-                      disabled={!currentCard}
-                      className="w-13 h-13 rounded-full bg-[#171a20] border border-white/[0.08] text-white flex items-center justify-center text-lg cursor-pointer transition hover:bg-white/10 active:scale-90"
-                    >
-                      ✕
-                    </button>
-                    <span className="text-[9px] font-bold tracking-widest text-[#8b909a]">PASS</span>
-                  </div>
-
-                  <div className="flex flex-col items-center gap-1">
-                    <button
-                      onClick={() => triggerSwipe('right')}
-                      disabled={!currentCard}
-                      className="w-15 h-15 rounded-full bg-[#d2ff38] text-[#0b0c0e] flex items-center justify-center text-xl font-bold cursor-pointer shadow-[0_6px_20px_rgba(210,255,56,0.3)] transition hover:brightness-110 active:scale-90"
-                    >
-                      ♡
-                    </button>
-                    <span className="text-[9px] font-bold tracking-widest text-[#d2ff38]">
-                      I'M IN
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-[10px] text-[#8b909a] mt-2">← Pass • Save →</p>
-              </div>
-            </div>
-
-            {/* RIGHT COLUMN: GOOD NIGHTS NEARBY & PROMO CARDS */}
-            <div className="w-full flex flex-col">
-              <div className="flex items-center justify-between mb-2.5">
-                <div>
-                  <h3 className="text-[17px] font-bold leading-snug">Good nights nearby</h3>
-                  <p className="text-[12px] text-[#8b909a]">
-                    A few more reasons to leave the couch. ({nearbyListSource.length} tonight)
-                  </p>
-                </div>
-                <button
-                  onClick={() => navigate('/explore')}
-                  className="hidden sm:inline-flex lg:hidden items-center gap-1.5 text-[12px] font-semibold border border-white/[0.08] px-3.5 py-1.5 rounded-full hover:bg-white/5 cursor-pointer"
-                >
-                  Explore all nearby parties <span>→</span>
-                </button>
-              </div>
-
-              {/* Compact Nearby Cards List (Scrollable for 60 places) */}
-              <div className="max-h-[250px] overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5">
-                {nearbyListSource.slice(0, nearbyVisibleCount).map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      const deckIdx = filteredEvents.findIndex((e) => e.id === item.id);
-                      if (deckIdx !== -1) {
-                        setCurrentIndex(deckIdx);
-                      } else {
-                        navigate(`/events/${item.id}`);
-                      }
-                    }}
-                    className={`flex items-center gap-3 bg-[#131519] border p-2.5 rounded-2xl cursor-pointer transition hover:-translate-y-0.5 ${
-                      currentCard?.id === item.id
-                        ? 'border-[#d2ff38]/50 bg-[#171b13]'
-                        : 'border-white/[0.08] hover:border-[#d2ff38]/30'
-                    }`}
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-15 h-15 rounded-xl object-cover shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <span className="block text-[9px] font-bold tracking-wider text-[#d2ff38] truncate">
-                        {item.tags[0].toUpperCase()} • {item.neighborhood}
-                      </span>
-                      <h4 className="text-[14px] font-bold text-white truncate leading-snug">
-                        {item.title}
-                      </h4>
-                      <span className="block text-[11px] text-[#8b909a] truncate">
-                        {item.time.split('–')[0]} • {item.distance}
-                      </span>
-                      <span className="block text-[11px] font-bold text-[#d2ff38]">
-                        {formatKsh(item.price)}
-                      </span>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/events/${item.id}`);
-                      }}
-                      className="text-base text-[#8b909a] hover:text-[#d2ff38] px-1.5"
-                      title="Open event details"
-                    >
-                      ›
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {nearbyVisibleCount < nearbyListSource.length && (
-                <button
-                  onClick={() =>
-                    setNearbyVisibleCount((prev) => Math.min(prev + 12, nearbyListSource.length))
-                  }
-                  className="w-full mt-2 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-[11px] font-semibold text-[#d2ff38] cursor-pointer transition"
-                >
-                  Show more places ({nearbyListSource.length - nearbyVisibleCount} more)
-                </button>
-              )}
-
-              <button
-                onClick={() => navigate('/explore')}
-                className="w-full my-3 sm:hidden lg:flex py-2.5 px-4 rounded-full border border-white/[0.08] hover:border-white/20 text-[12px] font-semibold items-center justify-between cursor-pointer transition"
-              >
-                <span>Explore all nearby parties</span>
-                <span>→</span>
-              </button>
-
-              {/* Promo Cards Bento Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 mt-2 sm:mt-3 lg:mt-0">
-                <div
-                  onClick={handleSurpriseMe}
-                  className="bg-gradient-to-br from-[#221c38] to-[#171426] border border-purple-400/20 rounded-2xl p-4 cursor-pointer hover:border-purple-400/40 transition"
-                >
-                  <span className="inline-block bg-white/[0.08] text-purple-300 text-[9px] font-bold px-2.5 py-0.5 rounded-full mb-2">
-                    A LITTLE MAIN CHARACTER ENERGY
+                  <span className="text-[9px] font-bold tracking-widest text-[#d2ff38]">
+                    I'M IN
                   </span>
-                  <h3 className="text-[18px] font-bold mb-1">No plans? Perfect.</h3>
-                  <p className="text-[11px] text-purple-200/75 leading-relaxed">
-                    The best nights usually start that way. Let a little luck pick where you end up.
-                  </p>
-                </div>
-
-                <div className="lg:hidden bg-gradient-to-br from-[#1b2116] to-[#141812] border border-[#d2ff38]/20 rounded-2xl p-4 flex flex-col justify-between">
-                  <div>
-                    <h4 className="text-[15px] font-bold mb-1">Make it a night.</h4>
-                    <p className="text-[11px] text-[#8b909a] leading-relaxed mb-3">
-                      Bring your people together. We'll bring the good vibes.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => navigate('/host')}
-                    className="w-full flex items-center justify-between text-[#d2ff38] text-[12px] font-bold cursor-pointer"
-                  >
-                    <span>Host a party</span>
-                    <span>→</span>
-                  </button>
                 </div>
               </div>
 
-              <p className="text-[11px] text-[#8b909a] mt-3">
-                Real events. Local energy. Always a good story.
-              </p>
+              <p className="text-[10px] text-[#8b909a] mt-2">← Pass • Save →</p>
             </div>
           </div>
 
-          {/* FOOTER */}
-          <footer className="mt-8 pt-3.5 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-[#8b909a]">
-            <span>GOOD PEOPLE. GREAT NIGHTS.</span>
-            <span>Discover spontaneously. Party responsibly. 21+</span>
-          </footer>
+          {/* RIGHT COLUMN: GOOD NIGHTS NEARBY & PROMO CARDS */}
+          <div className="w-full flex flex-col min-w-0">
+            <div className="flex items-center justify-between mb-2.5">
+              <div>
+                <h3 className="text-[17px] font-bold leading-snug">Good nights nearby</h3>
+                <p className="text-[12px] text-[#8b909a]">
+                  A few more reasons to leave the couch. ({nearbyListSource.length} tonight)
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/explore')}
+                className="hidden sm:inline-flex lg:hidden items-center gap-1.5 text-[12px] font-semibold border border-white/[0.08] px-3.5 py-1.5 rounded-full hover:bg-white/5 cursor-pointer"
+              >
+                Explore all nearby parties <span>→</span>
+              </button>
+            </div>
+
+            {/* Nearby List with Dark Custom Scrollbar & Image Fallback */}
+            <div className="max-h-[255px] overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/15 [&::-webkit-scrollbar-thumb]:rounded-full">
+              {nearbyListSource.slice(0, nearbyVisibleCount).map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    const deckIdx = filteredEvents.findIndex((e) => e.id === item.id);
+                    if (deckIdx !== -1) {
+                      setCurrentIndex(deckIdx);
+                    } else {
+                      navigate(`/events/${item.id}`);
+                    }
+                  }}
+                  className={`flex items-center gap-3 bg-[#131519] border p-2.5 rounded-2xl cursor-pointer transition hover:-translate-y-0.5 ${
+                    currentCard?.id === item.id
+                      ? 'border-[#d2ff38]/50 bg-[#171b13]'
+                      : 'border-white/[0.08] hover:border-[#d2ff38]/30'
+                  }`}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = FALLBACK_IMAGE;
+                    }}
+                    className="w-16 h-16 rounded-xl object-cover shrink-0 bg-[#1a1d24]"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="block text-[9px] font-bold tracking-wider text-[#d2ff38] truncate">
+                      {item.tags[0].toUpperCase()} • {item.neighborhood}
+                    </span>
+                    <h4 className="text-[14px] font-bold text-white truncate leading-snug">
+                      {item.title}
+                    </h4>
+                    <span className="block text-[11px] text-[#8b909a] truncate">
+                      {item.time.split('–')[0]} • {item.distance}
+                    </span>
+                    <span className="block text-[11px] font-bold text-[#d2ff38]">
+                      {formatKsh(item.price)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/events/${item.id}`);
+                    }}
+                    className="text-base text-[#8b909a] hover:text-[#d2ff38] px-1.5"
+                    title="Open event details"
+                  >
+                    ›
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {nearbyVisibleCount < nearbyListSource.length && (
+              <button
+                onClick={() =>
+                  setNearbyVisibleCount((prev) => Math.min(prev + 12, nearbyListSource.length))
+                }
+                className="w-full mt-2 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-[11px] font-semibold text-[#d2ff38] cursor-pointer transition"
+              >
+                Show more places ({nearbyListSource.length - nearbyVisibleCount} more)
+              </button>
+            )}
+
+            <button
+              onClick={() => navigate('/explore')}
+              className="w-full my-3 sm:hidden lg:flex py-2.5 px-4 rounded-full border border-white/[0.08] hover:border-white/20 text-[12px] font-semibold items-center justify-between cursor-pointer transition"
+            >
+              <span>Explore all nearby parties</span>
+              <span>→</span>
+            </button>
+
+            {/* Promo Cards Bento Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 mt-2 sm:mt-3 lg:mt-0">
+              <div
+                onClick={handleSurpriseMe}
+                className="bg-gradient-to-br from-[#221c38] to-[#171426] border border-purple-400/20 rounded-2xl p-4 cursor-pointer hover:border-purple-400/40 transition"
+              >
+                <span className="inline-block bg-white/[0.08] text-purple-300 text-[9px] font-bold px-2.5 py-0.5 rounded-full mb-2">
+                  A LITTLE MAIN CHARACTER ENERGY
+                </span>
+                <h3 className="text-[18px] font-bold mb-1">No plans? Perfect.</h3>
+                <p className="text-[11px] text-purple-200/75 leading-relaxed">
+                  The best nights usually start that way. Let a little luck pick where you end up.
+                </p>
+              </div>
+
+              <div className="lg:hidden bg-gradient-to-br from-[#1b2116] to-[#141812] border border-[#d2ff38]/20 rounded-2xl p-4 flex flex-col justify-between">
+                <div>
+                  <h4 className="text-[15px] font-bold mb-1">Make it a night.</h4>
+                  <p className="text-[11px] text-[#8b909a] leading-relaxed mb-3">
+                    Bring your people together. We'll bring the good vibes.
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate('/host')}
+                  className="w-full flex items-center justify-between text-[#d2ff38] text-[12px] font-bold cursor-pointer"
+                >
+                  <span>Host a party</span>
+                  <span>→</span>
+                </button>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-[#8b909a] mt-3">
+              Real events. Local energy. Always a good story.
+            </p>
+          </div>
         </div>
+
+        {/* FOOTER */}
+        <footer className="mt-8 pt-3.5 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-[#8b909a]">
+          <span>GOOD PEOPLE. GREAT NIGHTS.</span>
+          <span>Discover spontaneously. Party responsibly. 21+</span>
+        </footer>
       </div>
 
       {/* ================= SURPRISE ME POPUP MODAL ================= */}
