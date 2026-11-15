@@ -1,13 +1,11 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body, #root {
+html,
+body,
+#root {
   width: 100%;
   min-height: 100vh;
   background-color: #0b0c0e;
+  color: #f5f6f8;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
