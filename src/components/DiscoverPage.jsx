@@ -192,14 +192,19 @@ const pickSuitableEvent = (criteria = surpriseCriteria) => {
 };
   // --- SURPRISE ME SHUFFLE ANIMATION ---
   const handleSurpriseMe = () => {
-    if (filteredEvents.length === 0 || animClass) return;
-    setAnimClass('surprise-pulse');
-    setTimeout(() => {
-      const randomIdx = Math.floor(Math.random() * filteredEvents.length);
-      setCurrentIndex(randomIdx);
-      setAnimClass('');
-    }, 420);
-  };
+  setSurpriseModalOpen(true);
+  pickSuitableEvent(surpriseCriteria);
+};
+
+const handleAcceptSurprise = () => {
+  if (!surpriseEvent) return;
+  setSavedParties((prev) => {
+    if (prev.some((p) => p.id === surpriseEvent.id)) return prev;
+    return [...prev, surpriseEvent];
+  });
+  setSurpriseModalOpen(false);
+  navigate(`/events/${surpriseEvent.id}`);
+};
 
   // --- KEYBOARD ARROWS SUPPORT (<- Pass • Save ->) ---
   useEffect(() => {
