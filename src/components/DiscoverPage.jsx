@@ -156,7 +156,40 @@ export default function DiscoverPage() {
     setAnimClass('rewind-in');
     setTimeout(() => setAnimClass(''), 350);
   };
+const pickSuitableEvent = (criteria = surpriseCriteria) => {
+  const pool = filteredEvents.length > 0 ? filteredEvents : events;
+  if (pool.length === 0) return;
 
+  setIsRolling(true);
+  setSurpriseCriteria(criteria);
+
+  let candidates = [...pool];
+  if (criteria === 'budget') {
+    candidates = pool.filter((e) => e.price <= 15);
+  } else if (criteria === 'closest') {
+    candidates = [...pool].sort((a, b) => a.distanceMiles - b.distanceMiles).slice(0, 2);
+  }
+  if (candidates.length === 0) candidates = pool;
+
+  let ticks = 0;
+  const interval = setInterval(() => {
+    const randomPreview = pool[Math.floor(Math.random() * pool.length)];
+    setSurpriseEvent(randomPreview);
+    ticks += 1;
+
+    if (ticks >= 6) {
+      clearInterval(interval);
+      const others = candidates.filter((c) => c.id !== surpriseEvent?.id);
+      const finalPick =
+        others.length > 0
+          ? others[Math.floor(Math.random() * others.length)]
+          : candidates[Math.floor(Math.random() * candidates.length)];
+
+      setSurpriseEvent(finalPick);
+      setIsRolling(false);
+    }
+  }, 90);
+};
   // --- SURPRISE ME SHUFFLE ANIMATION ---
   const handleSurpriseMe = () => {
     if (filteredEvents.length === 0 || animClass) return;
