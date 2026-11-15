@@ -147,13 +147,6 @@ export default function DiscoverPage() {
   const [history, setHistory] = useState([]);
   const [nearbyVisibleCount, setNearbyVisibleCount] = useState(8);
 
-  const [savedParties, setSavedParties] = useState([
-    SIXTY_EVENTS[0],
-    SIXTY_EVENTS[1],
-    SIXTY_EVENTS[3],
-    SIXTY_EVENTS[4]
-  ]);
-
   const [selectedLocation, setSelectedLocation] = useState('All Nairobi Zones');
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -162,7 +155,7 @@ export default function DiscoverPage() {
   const [freeOnly, setFreeOnly] = useState(false);
   const [within5Km, setWithin5Km] = useState(false);
 
-  const [animState, setAnimState] = useState('');
+  const [animState, setAnimState] = useState(''); // 'left' | 'right' | 'rewind'
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
@@ -230,27 +223,21 @@ export default function DiscoverPage() {
 
   const currentCard = filteredEvents[currentIndex];
   const nextCard = filteredEvents[currentIndex + 1];
-  const totalSavedKsh = savedParties.reduce((sum, item) => sum + (item.price || 0), 0);
 
+  // --- SWIPE LEFT (RED / PASS) & SWIPE RIGHT (GREEN / I'M IN) ---
   const triggerSwipe = (direction) => {
     if (!currentCard || animState) return;
 
     setAnimState(direction);
     setDragOffset({ x: 0, y: 0 });
 
+    // Note: Teammate working on /saved-nights can hook into direction === 'right' here later
+
     setTimeout(() => {
       setHistory((prev) => [...prev, { index: currentIndex, direction, card: currentCard }]);
-
-      if (direction === 'right') {
-        setSavedParties((prev) => {
-          if (prev.some((p) => p.id === currentCard.id)) return prev;
-          return [...prev, currentCard];
-        });
-      }
-
       setCurrentIndex((prev) => prev + 1);
       setAnimState('');
-    }, 280);
+    }, 360);
   };
 
   const handleUndo = () => {
@@ -258,10 +245,6 @@ export default function DiscoverPage() {
     const lastAction = history[history.length - 1];
 
     setHistory((prev) => prev.slice(0, -1));
-    if (lastAction.direction === 'right') {
-      setSavedParties((prev) => prev.filter((p) => p.id !== lastAction.card.id));
-    }
-
     setCurrentIndex(lastAction.index);
     setAnimState('rewind');
     setTimeout(() => setAnimState(''), 280);
@@ -274,19 +257,12 @@ export default function DiscoverPage() {
     setIsRolling(true);
     setSurpriseCriteria(criteria);
 
-    const preferredTags = new Set(savedParties.flatMap((p) => p.tags || []));
-
     let candidates = [...basePool];
-    let reasonText = 'Matched to your energy & saved vibes';
+    let reasonText = 'Curated match from tonight’s 60 live plots';
 
     if (criteria === 'fit') {
-      const vibeMatches = basePool.filter((ev) =>
-        ev.tags.some((t) => preferredTags.has(t))
-      );
-      if (vibeMatches.length > 1) {
-        candidates = vibeMatches;
-        reasonText = `Fits your ${Array.from(preferredTags).slice(0, 2).join(' & ')} taste`;
-      }
+      candidates = basePool.filter((ev) => ev.spotsLeft <= 15);
+      reasonText = 'High-energy crowd favorite tonight';
     } else if (criteria === 'closest') {
       candidates = [...basePool]
         .sort((a, b) => a.distanceKm - b.distanceKm)
@@ -336,10 +312,6 @@ export default function DiscoverPage() {
 
   const handleAcceptSurprise = () => {
     if (!surpriseEvent) return;
-    setSavedParties((prev) => {
-      if (prev.some((p) => p.id === surpriseEvent.id)) return prev;
-      return [...prev, surpriseEvent];
-    });
     setSurpriseModalOpen(false);
     navigate(`/events/${surpriseEvent.id}`);
   };
@@ -392,14 +364,14 @@ export default function DiscoverPage() {
       return {
         transform: 'translate3d(-130%, 20px, 0) rotate(-16deg)',
         opacity: 0,
-        transition: 'transform 0.28s ease, opacity 0.28s ease'
+        transition: 'transform 0.36s ease, opacity 0.36s ease'
       };
     }
     if (animState === 'right') {
       return {
         transform: 'translate3d(130%, 20px, 0) rotate(16deg)',
         opacity: 0,
-        transition: 'transform 0.28s ease, opacity 0.28s ease'
+        transition: 'transform 0.36s ease, opacity 0.36s ease'
       };
     }
     return {
@@ -409,12 +381,15 @@ export default function DiscoverPage() {
     };
   };
 
-  const dragStampOpacity = Math.min(Math.abs(dragOffset.x) / 90, 1);
+  const isPassingRed = dragOffset.x < -25 || animState === 'left';
+  const isLikingGreen = dragOffset.x > 25 || animState === 'right';
+  const stampOpacity = animState ? 1 : Math.min(Math.abs(dragOffset.x) / 85, 1);
+
   const nearbyListSource = filteredEvents.length > 0 ? filteredEvents : events;
 
   return (
     <div className="min-h-screen w-full bg-[#0b0c0e] text-[#f5f6f8] flex overflow-x-hidden">
-      {/* ================= LEFT SIDEBAR (Pinned Flush Left on Desktop lg+) ================= */}
+      {/* ================= LEFT SIDEBAR (Desktop lg+) ================= */}
       <aside className="hidden lg:flex w-[240px] xl:w-[260px] bg-[#0e1013] border-r border-white/[0.08] px-5 py-6 flex-col shrink-0 sticky top-0 h-screen">
         <div className="px-1">
           <div className="text-[28px] font-extrabold tracking-tight leading-none">
@@ -431,13 +406,10 @@ export default function DiscoverPage() {
           </button>
 
           <button
-            onClick={() => navigate('/my-tickets')}
+            onClick={() => navigate('/saved-nights')}
             className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[13px] font-medium text-[#8b909a] hover:text-white hover:bg-white/[0.04] transition cursor-pointer"
           >
             <span>Saved nights</span>
-            <span className="bg-white/10 text-white text-[10px] px-2 py-0.5 rounded-full">
-              {savedParties.length} • {formatKsh(totalSavedKsh)}
-            </span>
           </button>
 
           <button
@@ -458,7 +430,7 @@ export default function DiscoverPage() {
         <div className="mt-auto mb-5 bg-gradient-to-br from-[#1b2116] to-[#141812] border border-[#d2ff38]/20 rounded-2xl p-4">
           <h4 className="text-[14px] font-bold mb-1">Make it a night.</h4>
           <p className="text-[11px] text-[#8b909a] leading-snug mb-3">
-            Bring your people together. We'll bring the good vibes.
+            Bring your people together. We&apos;ll bring the good vibes.
           </p>
           <button
             onClick={() => navigate('/host')}
@@ -474,7 +446,7 @@ export default function DiscoverPage() {
             onClick={() => navigate('/help')}
             className="text-[11px] text-[#8b909a] text-left hover:text-white cursor-pointer"
           >
-            Help & feedback
+            Help &amp; feedback
           </button>
           <div className="flex items-center gap-2.5">
             <img
@@ -490,7 +462,7 @@ export default function DiscoverPage() {
         </div>
       </aside>
 
-      {/* ================= MAIN WORKSPACE (Full Width, Flush Next to Sidebar) ================= */}
+      {/* ================= MAIN WORKSPACE ================= */}
       <div className="flex-1 flex flex-col px-4 py-4 sm:px-7 sm:py-5 lg:px-10 lg:py-6 min-w-0">
         {/* TOP HEADER BAR */}
         <header className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
@@ -517,7 +489,7 @@ export default function DiscoverPage() {
               {locationMenuOpen && (
                 <div className="absolute top-full left-0 mt-2 w-56 bg-[#14171d] border border-[#d2ff38]/30 rounded-2xl p-2 shadow-2xl z-50 flex flex-col gap-0.5">
                   <span className="text-[10px] font-bold tracking-wider text-[#8b909a] px-2.5 py-1">
-                    SWITCH TONIGHT'S ZONE
+                    SWITCH TONIGHT&apos;S ZONE
                   </span>
                   {LOCATIONS.map((loc) => (
                     <button
@@ -568,18 +540,10 @@ export default function DiscoverPage() {
           </button>
 
           <button
-            onClick={() => navigate('/my-tickets')}
-            className="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[#8b909a] hover:bg-white/5 text-[11px] sm:text-[12px] cursor-pointer"
+            onClick={() => navigate('/saved-nights')}
+            className="flex flex-col items-center justify-center py-2 px-2 rounded-xl text-[#8b909a] hover:bg-white/5 text-[11px] sm:text-[12px] cursor-pointer"
           >
-            <div className="flex items-center gap-1">
-              <span>Saved nights</span>
-              <span className="bg-white/15 text-white text-[10px] px-1.5 rounded-full">
-                {savedParties.length}
-              </span>
-            </div>
-            <span className="text-[10px] text-[#d2ff38] font-semibold">
-              {formatKsh(totalSavedKsh)}
-            </span>
+            <span>Saved nights</span>
           </button>
 
           <button
@@ -699,11 +663,11 @@ export default function DiscoverPage() {
           </div>
         </section>
 
-        {/* ================= RESPONSIVE 2-COLUMN DASHBOARD GRID ================= */}
+        {/* ================= 2-COLUMN DASHBOARD GRID ================= */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] xl:grid-cols-[1.18fr_0.82fr] gap-7 xl:gap-10 items-start flex-1">
           {/* LEFT COLUMN: SWIPE DECK */}
           <div className="w-full max-w-[540px] mx-auto lg:max-w-none lg:mx-0">
-            <div className="flex justify-between text-[10px] tracking-[1.2px] text-[#8b909a] mb-2">
+            <div className="flex items-center justify-between text-[10px] tracking-[1.2px] text-[#8b909a] mb-2">
               <span>CURATED FOR YOUR ENERGY</span>
               <span>
                 {filteredEvents.length > 0 && currentCard
@@ -733,27 +697,50 @@ export default function DiscoverPage() {
                   onPointerMove={handlePointerMove}
                   onPointerUp={handlePointerUp}
                   onPointerLeave={handlePointerUp}
-                  className="absolute inset-0 z-10 rounded-[22px] bg-cover bg-center p-5 sm:p-6 flex flex-col justify-between border border-white/[0.12] shadow-[0_18px_40px_rgba(0,0,0,0.65)] select-none touch-pan-y cursor-grab active:cursor-grabbing"
+                  className={`absolute inset-0 z-10 rounded-[22px] bg-cover bg-center p-5 sm:p-6 flex flex-col justify-between border-2 select-none touch-pan-y cursor-grab active:cursor-grabbing overflow-hidden ${
+                    isLikingGreen
+                      ? 'border-emerald-400 shadow-[0_0_50px_rgba(34,197,94,0.55)]'
+                      : isPassingRed
+                      ? 'border-red-500 shadow-[0_0_50px_rgba(239,68,68,0.55)]'
+                      : 'border-white/[0.12] shadow-[0_18px_40px_rgba(0,0,0,0.65)]'
+                  }`}
                 >
-                  {dragOffset.x > 25 && (
+                  {/* Full-Card Color Wash Overlay on Swipe Left (Red) or Right (Green) */}
+                  {isLikingGreen && (
                     <div
-                      style={{ opacity: dragStampOpacity }}
-                      className="absolute top-14 left-5 border-2 border-[#d2ff38] text-[#d2ff38] bg-black/70 px-3.5 py-1 rounded-lg text-lg font-black tracking-widest -rotate-12 pointer-events-none"
+                      style={{ opacity: stampOpacity * 0.35 }}
+                      className="absolute inset-0 bg-emerald-500 pointer-events-none z-0"
+                    />
+                  )}
+                  {isPassingRed && (
+                    <div
+                      style={{ opacity: stampOpacity * 0.35 }}
+                      className="absolute inset-0 bg-red-600 pointer-events-none z-0"
+                    />
+                  )}
+
+                  {/* GREEN "I'M IN" STAMP */}
+                  {isLikingGreen && (
+                    <div
+                      style={{ opacity: stampOpacity }}
+                      className="absolute top-16 left-6 z-20 border-3 border-emerald-400 text-emerald-400 bg-black/80 px-4 py-1.5 rounded-xl text-2xl font-black tracking-widest -rotate-12 shadow-[0_0_25px_rgba(34,197,94,0.6)] pointer-events-none"
                     >
-                      I'M IN
+                      I&apos;M IN ♡
                     </div>
                   )}
-                  {dragOffset.x < -25 && (
+
+                  {/* RED "PASS" STAMP */}
+                  {isPassingRed && (
                     <div
-                      style={{ opacity: dragStampOpacity }}
-                      className="absolute top-14 right-5 border-2 border-red-500 text-red-500 bg-black/70 px-3.5 py-1 rounded-lg text-lg font-black tracking-widest rotate-12 pointer-events-none"
+                      style={{ opacity: stampOpacity }}
+                      className="absolute top-16 right-6 z-20 border-3 border-red-500 text-red-500 bg-black/80 px-4 py-1.5 rounded-xl text-2xl font-black tracking-widest rotate-12 shadow-[0_0_25px_rgba(239,68,68,0.6)] pointer-events-none"
                     >
-                      PASS
+                      PASS ✕
                     </div>
                   )}
 
                   {/* Top Badges */}
-                  <div className="flex items-center justify-between">
+                  <div className="relative z-10 flex items-center justify-between">
                     <span className="bg-[#d2ff38] text-[#0b0c0e] text-[10px] font-extrabold px-3 py-1 rounded-full">
                       {currentCard.pickLabel}
                     </span>
@@ -763,7 +750,7 @@ export default function DiscoverPage() {
                   </div>
 
                   {/* Bottom Card Info */}
-                  <div>
+                  <div className="relative z-10">
                     <div className="flex flex-wrap gap-1.5 mb-2.5">
                       {currentCard.tags.map((tag) => (
                         <span
@@ -829,9 +816,9 @@ export default function DiscoverPage() {
               )}
             </div>
 
-            {/* Swipe Action Buttons */}
+            {/* Color-Coded Swipe Action Buttons (Red Pass / Green I'm In) */}
             <div className="flex flex-col items-center mt-4">
-              <div className="flex items-start gap-5">
+              <div className="flex items-start gap-6">
                 <button
                   onClick={handleUndo}
                   disabled={history.length === 0}
@@ -841,32 +828,39 @@ export default function DiscoverPage() {
                   ↺
                 </button>
 
+                {/* RED PASS BUTTON */}
                 <div className="flex flex-col items-center gap-1">
                   <button
                     onClick={() => triggerSwipe('left')}
                     disabled={!currentCard}
-                    className="w-14 h-14 rounded-full bg-[#171a20] border border-white/[0.1] text-white flex items-center justify-center text-lg cursor-pointer transition hover:bg-white/10 active:scale-90"
+                    className="w-14 h-14 rounded-full bg-red-500/15 border-2 border-red-500/60 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center text-lg font-bold cursor-pointer shadow-[0_6px_20px_rgba(239,68,68,0.25)] transition active:scale-90"
                   >
                     ✕
                   </button>
-                  <span className="text-[9px] font-bold tracking-widest text-[#8b909a]">PASS</span>
+                  <span className="text-[10px] font-extrabold tracking-widest text-red-400">
+                    PASS
+                  </span>
                 </div>
 
+                {/* GREEN I'M IN BUTTON */}
                 <div className="flex flex-col items-center gap-1">
                   <button
                     onClick={() => triggerSwipe('right')}
                     disabled={!currentCard}
-                    className="w-16 h-16 rounded-full bg-[#d2ff38] text-[#0b0c0e] flex items-center justify-center text-xl font-bold cursor-pointer shadow-[0_6px_20px_rgba(210,255,56,0.3)] transition hover:brightness-110 active:scale-90"
+                    className="w-16 h-16 rounded-full bg-emerald-400 text-[#0b0c0e] hover:bg-emerald-300 flex items-center justify-center text-xl font-black cursor-pointer shadow-[0_6px_24px_rgba(34,197,94,0.45)] transition active:scale-90"
                   >
                     ♡
                   </button>
-                  <span className="text-[9px] font-bold tracking-widest text-[#d2ff38]">
-                    I'M IN
+                  <span className="text-[10px] font-extrabold tracking-widest text-emerald-400">
+                    I&apos;M IN
                   </span>
                 </div>
               </div>
 
-              <p className="text-[10px] text-[#8b909a] mt-2">← Pass • Save →</p>
+              <p className="text-[10px] text-[#8b909a] mt-2">
+                <span className="text-red-400">← Pass</span> •{' '}
+                <span className="text-emerald-400">I&apos;m In →</span>
+              </p>
             </div>
           </div>
 
@@ -887,7 +881,6 @@ export default function DiscoverPage() {
               </button>
             </div>
 
-            {/* Nearby List with Dark Custom Scrollbar & Image Fallback */}
             <div className="max-h-[255px] overflow-y-auto pr-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/15 [&::-webkit-scrollbar-thumb]:rounded-full">
               {nearbyListSource.slice(0, nearbyVisibleCount).map((item) => (
                 <div
@@ -981,7 +974,7 @@ export default function DiscoverPage() {
                 <div>
                   <h4 className="text-[15px] font-bold mb-1">Make it a night.</h4>
                   <p className="text-[11px] text-[#8b909a] leading-relaxed mb-3">
-                    Bring your people together. We'll bring the good vibes.
+                    Bring your people together. We&apos;ll bring the good vibes.
                   </p>
                 </div>
                 <button
@@ -1025,7 +1018,7 @@ export default function DiscoverPage() {
             </button>
 
             <span className="inline-block bg-white/10 text-purple-300 text-[9px] font-bold px-2.5 py-0.5 rounded-full mb-1.5">
-              TONIGHT'S FATE PICKER
+              TONIGHT&apos;S FATE PICKER
             </span>
             <h2 className="text-xl font-extrabold">
               {isRolling ? 'Scanning 60 live plots...' : 'We found your spot.'}
@@ -1116,9 +1109,9 @@ export default function DiscoverPage() {
               <button
                 onClick={handleAcceptSurprise}
                 disabled={isRolling}
-                className="sm:flex-1 py-2.5 rounded-full bg-[#d2ff38] text-[#0b0c0e] text-xs font-extrabold cursor-pointer shadow-[0_6px_20px_rgba(210,255,56,0.3)] hover:brightness-110 transition"
+                className="sm:flex-1 py-2.5 rounded-full bg-emerald-400 text-[#0b0c0e] text-xs font-extrabold cursor-pointer shadow-[0_6px_20px_rgba(34,197,94,0.35)] hover:brightness-110 transition"
               >
-                I'm In — Lock Spot
+                I&apos;m In — View Event
               </button>
             </div>
           </div>

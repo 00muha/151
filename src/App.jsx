@@ -21,7 +21,7 @@ function Custom404() {
         </h2>
 
         <p className="text-xs text-[#8b909a] leading-relaxed mb-6">
-          The path <span className="text-[#d2ff38] font-mono bg-white/5 px-2 py-0.5 rounded">{location.pathname}</span> is created and connected, waiting for the teammate handling this page to link their component.
+          The path <span className="text-[#d2ff38] font-mono bg-white/5 px-2 py-0.5 rounded">{location.pathname}</span> BOIZ HAKUNA KITU HAPA
         </p>
 
         <button
