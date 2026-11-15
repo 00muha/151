@@ -10,31 +10,19 @@ function Custom404() {
     <div className="min-h-screen bg-[#0b0c0e] text-[#f5f6f8] flex flex-col items-center justify-center p-6 font-sans select-none">
       <div className="w-full max-w-md bg-[#131519] border border-white/10 rounded-3xl p-8 text-center shadow-2xl">
         <span className="inline-block bg-[#1e2418] text-[#d2ff38] text-[11px] font-extrabold tracking-widest px-3.5 py-1.5 rounded-full border border-[#d2ff38]/30 mb-5">
-          ERROR 404 • MODULE NOT MERGED
+          ERROR 404 • PAGE NOT LINKED YET
         </span>
 
         <h1 className="text-5xl font-black tracking-tight text-white mb-2">
           404<span className="text-[#d2ff38]">.</span>
         </h1>
         <h2 className="text-xl font-bold text-white mb-3">
-          Wrong turn in the dark.
+          Route ready for teammate.
         </h2>
 
-        <p className="text-sm text-[#8b909a] leading-relaxed mb-6">
-          The route <span className="text-[#d2ff38] font-mono bg-white/5 px-2 py-0.5 rounded">{location.pathname}</span> yooh boiz uko kubaya
+        <p className="text-xs text-[#8b909a] leading-relaxed mb-6">
+          The path <span className="text-[#d2ff38] font-mono bg-white/5 px-2 py-0.5 rounded">{location.pathname}</span> is created and connected, waiting for the teammate handling this page to link their component.
         </p>
-
-        <div className="bg-[#0e1013] border border-white/5 rounded-2xl p-4 text-left text-xs text-[#8b909a] space-y-1.5 mb-7">
-          <div className="text-white font-semibold mb-1">Active Route Status:</div>
-          <div className="flex justify-between">
-            <span>/ (Discover Swipe & Feed)</span>
-            <span className="text-[#d2ff38] font-semibold">LIVE</span>
-          </div>
-          <div className="flex justify-between">
-            <span>{location.pathname}</span>
-            <span className="text-red-400 font-semibold">404 MISSING FILE</span>
-          </div>
-        </div>
 
         <button
           onClick={() => navigate('/')}
@@ -54,11 +42,12 @@ export default function App() {
         {/* Your Main Discover Page */}
         <Route path="/" element={<DiscoverPage />} />
 
-        
+        {/* Teammate Paths Created & Waiting to be Linked */}
+        <Route path="/saved-nights" element={<Custom404 />} />
+        <Route path="/my-tickets" element={<Custom404 />} />
         <Route path="/explore" element={<Custom404 />} />
         <Route path="/host" element={<Custom404 />} />
         <Route path="/events/:id" element={<Custom404 />} />
-        <Route path="/my-tickets" element={<Custom404 />} />
         <Route path="/gate-scanner" element={<Custom404 />} />
         <Route path="*" element={<Custom404 />} />
       </Routes>
