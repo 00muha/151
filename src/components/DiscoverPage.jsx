@@ -90,6 +90,11 @@ export default function DiscoverPage() {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
 
+  // Surprise Me Modal states
+  const [surpriseModalOpen, setSurpriseModalOpen] = useState(false);
+  const [isRolling, setIsRolling] = useState(false);
+  const [surpriseEvent, setSurpriseEvent] = useState(null);
+  const [surpriseCriteria, setSurpriseCriteria] = useState('best'); // 'best', 'budget', 'closest'
   // Fetch from json-server if running, otherwise fallback to INITIAL_EVENTS
   useEffect(() => {
     fetch('http://localhost:3000/events')
