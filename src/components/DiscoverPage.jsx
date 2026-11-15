@@ -625,6 +625,24 @@ const handleAcceptSurprise = () => {
           <span>Discover spontaneously. Party responsibly. 21+</span>
         </footer>
       </div>
+      {surpriseModalOpen && surpriseEvent && (
+      <div className="surprise-modal-overlay" onClick={() => setSurpriseModalOpen(false)}>
+        <div className="surprise-modal-card" onClick={(e) => e.stopPropagation()}>
+          <button
+            className="surprise-close-btn"
+            onClick={() => setSurpriseModalOpen(false)}
+            aria-label="Close modal"
+          >
+            ✕
+          </button>
+          <div className="surprise-modal-header">
+            <span className="energy-pill">✦ TONIGHT'S FATE PICKER</span>
+            <h2>{isRolling ? 'Scanning tonight’s energy...' : 'We found your spot.'}</h2>
+            <p>Pick your vibe priority or let luck decide where you end up.</p>
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 }
