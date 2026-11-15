@@ -21,7 +21,7 @@ function Custom404() {
         </h2>
 
         <p className="text-sm text-[#8b909a] leading-relaxed mb-6">
-          The route <span className="text-[#d2ff38] font-mono bg-white/5 px-2 py-0.5 rounded">{location.pathname}</span> page not found
+          The route <span className="text-[#d2ff38] font-mono bg-white/5 px-2 py-0.5 rounded">{location.pathname}</span> yooh boiz uko kubaya
         </p>
 
         <div className="bg-[#0e1013] border border-white/5 rounded-2xl p-4 text-left text-xs text-[#8b909a] space-y-1.5 mb-7">
