@@ -105,25 +105,19 @@ export default function HostPage() {
       image: image.trim() || PRESET_FLYERS[0].url
     };
 
-      setIsSubmitting(true);
+    setIsSubmitting(true);
 
-    // Save locally for this session so it appears on DiscoverPage immediately
     try {
       const existing = JSON.parse(sessionStorage.getItem('aftr_hosted_events') || '[]');
       sessionStorage.setItem('aftr_hosted_events', JSON.stringify([newParty, ...existing]));
-    } catch {}
+    } catch (err) {
+      console.error(err);
+    }
 
     setPublishSuccess(true);
     setTimeout(() => {
       navigate('/');
     }, 700);
-    
-    } catch {
-      setErrorMsg(
-        'Could not reach json-server on port 3000. Make sure "npx json-server --watch db.json --port 3000" is running.'
-      );
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -238,11 +232,11 @@ export default function HostPage() {
 
             {publishSuccess && (
               <div className="bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-xs font-bold px-4 py-3 rounded-xl">
-                Party published to db.json! Redirecting you to the Discover swipe deck...
+                Party published! Redirecting you to the Discover swipe deck...
               </div>
             )}
 
-            {/* Title & Subtitle */}
+            {/* Title & Venue */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-[11px] font-bold tracking-wider text-[#8b909a] mb-1.5">
@@ -441,7 +435,7 @@ export default function HostPage() {
               disabled={isSubmitting}
               className="w-full bg-[#d2ff38] text-[#0b0c0e] font-extrabold text-xs sm:text-sm py-3.5 rounded-full hover:brightness-110 active:scale-98 transition cursor-pointer shadow-[0_8px_24px_rgba(210,255,56,0.3)] disabled:opacity-50"
             >
-              {isSubmitting ? 'Publishing to Tonight’s Deck...' : 'Launch Party to Tonight’s Deck →'}
+              {isSubmitting ? 'Publishing...' : 'Launch Party to Tonight’s Deck →'}
             </button>
           </form>
 

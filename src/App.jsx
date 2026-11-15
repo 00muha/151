@@ -47,11 +47,10 @@ export default function App() {
         <Route path="/saved-nights" element={<Custom404 />} />
         <Route path="/my-tickets" element={<Custom404 />} />
         <Route path="/explore" element={<Custom404 />} />
-        <Route path="/host" element={<Custom404 />} />
+        <Route path="/host" element={<HostPage />} />
         <Route path="/events/:id" element={<Custom404 />} />
         <Route path="/gate-scanner" element={<Custom404 />} />
         <Route path="*" element={<Custom404 />} />
-        <Route path="/host" element={<HostPage />} />
       </Routes>
     </Router>
   );
