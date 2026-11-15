@@ -636,6 +636,54 @@ const handleAcceptSurprise = () => {
             ✕
           </button>
           <div className="surprise-modal-header">
+            <div className="surprise-criteria-row">
+            <button
+              className={`crit-pill ${surpriseCriteria === 'best' ? 'active' : ''}`}
+              onClick={() => pickSuitableEvent('best')}
+            >
+              🔥 Best Overall
+            </button>
+            <button
+              className={`crit-pill ${surpriseCriteria === 'closest' ? 'active' : ''}`}
+              onClick={() => pickSuitableEvent('closest')}
+            >
+              📍 Closest to Me
+            </button>
+            <button
+              className={`crit-pill ${surpriseCriteria === 'budget' ? 'active' : ''}`}
+              onClick={() => pickSuitableEvent('budget')}
+            >
+               Under $15 / Free
+            </button>
+          </div>
+
+          <div
+            className={`surprise-result-box ${isRolling ? 'rolling-blur' : 'locked-pop'}`}
+            style={{
+              backgroundImage: `linear-gradient(180deg, rgba(11,12,14,0.15) 0%, rgba(11,12,14,0.96) 80%), url(${surpriseEvent.image})`
+            }}
+          >
+            <div className="card-top-Row">
+              <span className="tonight-pick-badge">98% VIBE MATCH</span>
+              <span className="cover-price-badge">
+                {surpriseEvent.price === 0 ? 'Free Entry' : `$${surpriseEvent.price} cover`}
+              </span>
+            </div>
+            <div className="surprise-result-info">
+              <div className="card-tags">
+                {surpriseEvent.tags.map((tag) => (
+                  <span key={tag} className="tag-chip">{tag}</span>
+                ))}
+                <span className="tag-chip spots-chip">🔥 {surpriseEvent.spotsLeft} spots left</span>
+              </div>
+              <h3>{surpriseEvent.title}</h3>
+              <p>{surpriseEvent.subtitle}</p>
+              <div className="surprise-meta">
+                <span> {surpriseEvent.venue} ({surpriseEvent.distance})</span>
+                <span> {surpriseEvent.time}</span>
+              </div>
+            </div>
+          </div>
             <span className="energy-pill">✦ TONIGHT'S FATE PICKER</span>
             <h2>{isRolling ? 'Scanning tonight’s energy...' : 'We found your spot.'}</h2>
             <p>Pick your vibe priority or let luck decide where you end up.</p>
