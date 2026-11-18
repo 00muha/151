@@ -5,10 +5,17 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-const isProduction = env.NODE_ENV === 'production'
-
 export default defineConfig({
-  base: isProduction ? '/151/' : '/',
+  base: '/151/',
+  server: {
+    proxy: {
+      '/api': {
+        target: `http://127.0.0.1:${env.API_PORT || '3000'}`,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),

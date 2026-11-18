@@ -1,6 +1,8 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import DiscoverPage from './components/DiscoverPage';
 import HostPage from './components/HostPage';
+import SavedNightsPage from './components/SavedNightsPage';
+import ExploreMap from './pages/ExploreMap/ExploreMap';
 import MyTicketsPage from './features/my-tickets/MyTicketsPage';
 
 function Custom404() {
@@ -38,15 +40,15 @@ function Custom404() {
 
 export default function App() {
   return (
-    <Router basename={import.meta.env.BASE_URL}>
+    <Router>
       <Routes>
         {/* Your Main Discover Page */}
         <Route path="/" element={<DiscoverPage />} />
 
         {/* Teammate Paths Created & Waiting to be Linked */}
-        <Route path="/saved-nights" element={<Custom404 />} />
+        <Route path="/saved-nights" element={<SavedNightsPage />} />
         <Route path="/my-tickets" element={<MyTicketsPage />} />
-        <Route path="/explore" element={<Custom404 />} />
+        <Route path="/explore" element={<ExploreMap />} />
         <Route path="/host" element={<HostPage />} />
         <Route path="/events/:id" element={<Custom404 />} />
         <Route path="/gate-scanner" element={<Custom404 />} />

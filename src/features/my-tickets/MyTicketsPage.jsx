@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
-import './my-tickets.css';
+import Sidebar from '../../components/Sidebar';
 
 const TICKETS_STORAGE_KEY = 'aftr_my_tickets';
 const NAIROBI_TIME_ZONE = 'Africa/Nairobi';
@@ -493,58 +493,8 @@ export default function MyTicketsPage() {
   const selectableDates = Array.from({ length: 7 }, (_, offset) => getNairobiDate(offset));
 
   return (
-    <div className="flex min-h-screen w-full bg-[#0b0c0e] text-[#f5f6f8]">
-      <aside className="sticky top-0 hidden h-screen w-[240px] shrink-0 flex-col border-r border-white/[0.08] bg-[#0e1013] px-5 py-6 lg:flex xl:w-[260px]">
-        <div className="px-1">
-          <div className="text-[28px] font-extrabold leading-none">aftr<span className="text-[#d2ff38]">.</span></div>
-          <p className="mt-1.5 text-[9px] tracking-[1.4px] text-[#8b909a]">GO OUT. FIND YOUR PEOPLE.</p>
-        </div>
-        <nav aria-label="Main navigation" className="mt-8 flex flex-col gap-1.5">
-          <button className="flex cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-[13px] font-medium text-[#8b909a] transition hover:bg-white/[0.04] hover:text-white" onClick={() => navigate('/')} type="button">Discover</button>
-          <button className="flex cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-[13px] font-medium text-[#8b909a] transition hover:bg-white/[0.04] hover:text-white" onClick={() => navigate('/saved-nights')} type="button">Saved nights <span className="text-[10px]">4</span></button>
-          <button aria-current="page" className="flex cursor-pointer items-center justify-between rounded-xl bg-[#1e2418] px-3.5 py-2.5 text-left text-[13px] font-semibold text-[#d2ff38]" onClick={() => navigate('/my-tickets')} type="button">My tickets</button>
-          <button className="flex cursor-pointer items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-[13px] font-medium text-[#8b909a] transition hover:bg-white/[0.04] hover:text-white" onClick={() => navigate('/explore')} type="button">Explore map</button>
-        </nav>
-
-        <div className="mt-auto mb-5 rounded-2xl border border-[#d2ff38]/15 bg-[#171b14] p-4">
-          <h3 className="mb-1 text-[14px] font-bold">Make it a night.</h3>
-          <p className="mb-3 text-[11px] leading-snug text-[#8b909a]">Bring your people together. We’ll bring the good vibes.</p>
-          <button className="flex w-full cursor-pointer items-center justify-between text-[12px] font-semibold text-[#d2ff38] hover:underline" onClick={() => navigate('/host')} type="button">
-            Host a party <span>→</span>
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-3 border-t border-white/[0.08] pt-4">
-          <button className="cursor-pointer text-left text-[11px] text-[#8b909a] hover:text-white" onClick={() => navigate('/help')} type="button">Help & feedback</button>
-          <div className="flex items-center gap-2.5">
-            <img alt="" className="h-8 w-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120" />
-            <div><strong className="block text-[12px] font-semibold leading-tight">Jamie Miller</strong><span className="text-[10px] text-[#8b909a]">Your next story awaits</span></div>
-          </div>
-        </div>
-      </aside>
-
-      <main className="flex min-w-0 flex-1 flex-col px-4 py-4 sm:px-7 sm:py-5 lg:px-10 lg:py-6">
-        <header className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
-          <div className="flex items-center gap-3">
-            <button aria-label="Go to discover" className="text-[22px] font-extrabold lg:hidden" onClick={() => navigate('/')} type="button">aftr<span className="text-[#d2ff38]">.</span></button>
-            <div className="hidden items-center gap-2 text-[12px] text-[#aeb0a9] sm:flex">
-              <span aria-hidden="true" className="text-[#d2ff38]">⌖</span>Nairobi, Kenya <span className="text-[10px]">⌄</span>
-            </div>
-            <span className="text-[11px] text-[#8b909a] sm:hidden">My tickets</span>
-          </div>
-          <div className="flex items-center gap-3 sm:gap-5">
-            <span className="hidden text-[11px] text-[#8b909a] md:inline">Nairobi · {clock} EAT</span>
-            <span aria-label="Notifications" className="relative text-[15px] text-[#b8bab3]">♧<i className="absolute -right-0.5 top-0 h-1.5 w-1.5 rounded-full bg-[#d2ff38]" /></span>
-            <button aria-label="Profile" className="flex h-7 w-7 items-center justify-center rounded-full bg-[#5c75bd] text-[11px] font-bold text-white" type="button">JM</button>
-          </div>
-        </header>
-
-        <nav aria-label="Page navigation" className="grid grid-cols-4 gap-1.5 border-b border-white/[0.08] py-2.5 lg:hidden">
-          <button className="rounded-lg py-2 text-[10px] text-[#8b909a] hover:bg-white/5" onClick={() => navigate('/')} type="button">Discover</button>
-          <button className="rounded-lg py-2 text-[10px] text-[#8b909a] hover:bg-white/5" onClick={() => navigate('/saved-nights')} type="button">Saved nights</button>
-          <button aria-current="page" className="rounded-lg bg-[#1e2418] py-2 text-[10px] font-semibold text-[#d2ff38]" onClick={() => navigate('/my-tickets')} type="button">My tickets</button>
-          <button className="rounded-lg py-2 text-[10px] text-[#8b909a] hover:bg-white/5" onClick={() => navigate('/explore')} type="button">Explore map</button>
-        </nav>
+    <Sidebar>
+      <div className="flex min-w-0 flex-col">
 
         <section className="my-5 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -672,13 +622,8 @@ export default function MyTicketsPage() {
           </aside>
         </div>
 
-        <footer className="mt-6 flex flex-col items-center justify-between gap-2 border-t border-white/[0.08] pt-3.5 text-[9px] text-[#777a72] sm:flex-row">
-          <span>GOOD PEOPLE. GREAT NIGHTS.</span>
-          <span>Discover spontaneously. Party responsibly. 21+</span>
-        </footer>
-      </main>
-
       {selectedTicket && <TicketDetails onClose={() => setSelectedTicket(null)} ticket={selectedTicket} />}
-    </div>
+      </div>
+    </Sidebar>
   );
 }

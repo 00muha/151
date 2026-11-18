@@ -139,6 +139,59 @@ const LOCATIONS = [
 const formatKsh = (amount) =>
   Number(amount) === 0 ? 'Free' : `KSh ${Number(amount).toLocaleString()}`;
 
+function formatEventStartTime(time) {
+  if (!/^\d{2}:\d{2}$/.test(String(time || ''))) return time || 'Tonight';
+
+  return new Intl.DateTimeFormat('en-KE', {
+    timeZone: 'Africa/Nairobi',
+    hour: 'numeric',
+    minute: '2-digit'
+  }).format(new Date(`1970-01-01T${time}:00+03:00`));
+}
+
+function normalizeServerEvent(event, index) {
+  const location = event.location || {};
+  const address = location.address || 'Nairobi';
+  const zone = LOCATIONS.slice(1).find((item) => address.toLowerCase().includes(item.split(',')[0].toLowerCase()));
+  const category = String(event.category || 'event').toLowerCase();
+  const categoryTags = {
+    music: ['Afrobeats', 'Live music'],
+    charity: ['Community'],
+    education: ['Culture'],
+    tech: ['Tech'],
+    wellness: ['Wellness']
+  };
+  const price = String(event.price).toLowerCase() === 'free' ? 0 : Number(event.price) || 0;
+  const latitude = Number(location.lat);
+  const longitude = Number(location.long);
+  const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude);
+  const latitudeDelta = (latitude + 1.2864) * 111;
+  const longitudeDelta = (longitude - 36.8172) * 111 * Math.cos((-1.2864 * Math.PI) / 180);
+  const distanceKm = hasCoordinates
+    ? Number(Math.max(0.2, Math.hypot(latitudeDelta, longitudeDelta)).toFixed(1))
+    : 1 + (index % 5);
+  const startTime = formatEventStartTime(event.startTime);
+
+  return {
+    id: String(event.id),
+    city: zone || '',
+    neighborhood: address,
+    pickLabel: `${category.toUpperCase()} NIGHT`,
+    title: event.title || 'Nairobi event',
+    subtitle: event.description || 'A good night out in Nairobi.',
+    venue: location.venue || 'Nairobi venue',
+    distance: `${distanceKm.toFixed(1)} km`,
+    distanceKm,
+    time: `Tonight, ${startTime}${event.endTime ? ` – ${event.endTime}` : ''}`,
+    price,
+    tags: Array.isArray(event.tags) && event.tags.length
+      ? event.tags
+      : categoryTags[category] || [category],
+    spotsLeft: 8 + (index % 17),
+    image: event.image || FALLBACK_IMAGE
+  };
+}
+
 export default function DiscoverPage() {
   const navigate = useNavigate();
 
@@ -174,11 +227,12 @@ export default function DiscoverPage() {
   const rollIntervalRef = useRef(null);
 
   useEffect(() => {
-    fetch('http://localhost:3000/events')
+    fetch('/api/events')
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
-        if (Array.isArray(data) && data.length >= 10) {
-          setEvents(data);
+        const eventRows = Array.isArray(data) ? data : data.events;
+        if (Array.isArray(eventRows) && eventRows.length > 0) {
+          setEvents(eventRows.map(normalizeServerEvent));
         }
       })
       .catch(() => {});
